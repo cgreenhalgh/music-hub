@@ -1,6 +1,6 @@
 import * as express from 'express'
 
-import { authenticate, AuthenticationError } from './db'
+import { authenticate, AuthenticationError, getWorks } from './db'
 
 const router = express.Router()
 
@@ -15,7 +15,7 @@ function badrequest(res, message:string) {
   return res.sendStatus(400)
 }
 
-router.all('/', (req, res, next) => {
+router.use((req, res, next) => {
   let authorization = req.headers.authorization
   if (req.user) return next()
   if (!authorization) return unauthorized(res)
@@ -49,6 +49,29 @@ router.all('/', (req, res, next) => {
       res.sendStatus(500)
       return
     }
+  })
+})
+
+// GET account
+router.get('/account', (req, res) => {
+  if (!req.user) {
+    console.log(`Error: GET /account with null req.user`)
+    return unauthorized(res)
+  }
+  res.setHeader('Content-type', 'application/json')
+  res.send(JSON.stringify(req.user))
+})
+
+// GET works
+router.get('/works', (req, res) => {
+  getWorks(req.user)
+  .then((works) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(works))
+  })
+  .catch((err) => {
+    console.log(`Error getting works: ${err.message}`, err)
+    res.sendStatus(500)
   })
 })
 

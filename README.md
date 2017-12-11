@@ -58,14 +58,18 @@ node dist/index.js
 ```
 open [http://127.0.0.1:4200/](http://127.0.0.1:4200/)
 
+### Test
+
+```
+curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/account
+curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/works
+```
+
 
 ## TODO
 
 MVP - see [designnotes API design](docs/designnotes.md#API%20design):
 
-- server database connection
-- server basic auth
-- server get account (check auth)
 - client log in
 - server get performances
 - client list performances (1)

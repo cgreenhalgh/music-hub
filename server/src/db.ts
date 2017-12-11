@@ -1,6 +1,7 @@
 // database
 import * as mysql from 'mysql'
-import {Account} from './types'
+import { Account, RoleAssignment, Role, Work } from './types'
+import { Capability, hasCapability } from './access'
 
 let pool = mysql.createPool({
   connectionLimit : 10,
@@ -55,5 +56,82 @@ export function authenticate(email:string, password:string) : Promise<Account> {
           resolve(account)
       })
     })
+  })
+}
+
+export function getRoles(account:Account, workid?: number, performanceid?: number) : Promise<string[]> {
+  return new Promise((resolve,reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT `role` FROM `account` WHERE `accountid` = ?'
+      let params = [account.id]
+      if (workid) {
+        query = query+' AND `workdid` = ?'
+        params.push(workid)
+      } else {
+        query = query+' AND ISNULL(`workid`)'
+      }
+      if (performanceid) {
+        query = query+' AND `performanceid` = ?'
+        params.push(performanceid)
+      } else {
+        query = query+' AND ISNULL(`performanceid`)'
+      }
+      con.query(query, params, (error, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getRoles select: ${err.message}`)
+            reject(err)
+            return
+          }
+          con.release()
+          let roles:Role[] = results.map((r) => { return r.role as Role; })
+          resolve(roles)
+      })
+    })
+  })
+}
+
+export function getWorks(account:Account) : Promise<Work[]> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT `id`, `title`, `year`, `version`, `composer`, `description` FROM `work`'
+      con.query(query, (error, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getWorks select: ${err.message}`)
+            reject(err)
+            return
+          }
+          con.release()
+          let works:Work[] = results.map((r) => r as Work)
+          let accessps:Promise<boolean>[] = works.map((work) => hasCapability(account, Capability.ViewWork, work))
+          Promise.all(accessps).then(accesses => {
+            let fworks:Work[] = []
+            for (let i in works) {
+              if (accesses[i]) {
+                fworks.push(works[i])
+              }
+            }
+            resolve(fworks)
+          })
+          .catch((err) => {
+            console.log(`Error checking access to works: ${err.message}`, err)
+            reject(err)
+          })
+      })
+    })
+    
   })
 }
