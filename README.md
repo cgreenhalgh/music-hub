@@ -34,4 +34,12 @@ docker run -it --link hubdb:mysql --rm mysql:5.7 sh -c 'exec mysql -h"$MYSQL_POR
 
 Database set up - use [createdb.sql](createdb.sql).
 
+```
+docker build -t music-hub .
+```
+
+Dev.
+```
+docker run -it --rm -v`pwd`:/root/work  music-hub /bin/bash
+```
 
