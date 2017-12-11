@@ -15,6 +15,11 @@ See [docs/designnotes.md](docs/designnotes.md)
 
 ## Build / install
 
+We'll use an internal network, `internal` - make it if it doesn't exist:
+```
+docker network create --driver bridge internal
+```
+
 ```
 LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32} > hubdb.password
 LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32} > hubadmin.password
@@ -24,12 +29,12 @@ Dockerised.
 
 Persistence: [mysql](https://hub.docker.com/_/mysql/)
 ```
-docker run --name hubdb -e MYSQL_ROOT_PASSWORD=pw -d --restart=always mysql:5.7
+docker run --name hubdb -e MYSQL_ROOT_PASSWORD=`cat hubdb.password` --network=internal -d --restart=always mysql:5.7
 ```
 
 DB debug access:
 ```
-docker run -it --link hubdb:mysql --rm mysql:5.7 sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+docker run -it --rm --network=internal mysql:5.7 sh -c "exec mysql -hhubdb -P3306 -uroot -p`cat hubdb.password`"
 ```
 
 Database set up - use [createdb.sql](createdb.sql).
@@ -40,6 +45,17 @@ docker build -t music-hub .
 
 Dev.
 ```
-docker run -it --rm -v`pwd`:/root/work  music-hub /bin/bash
+docker run -it -p 4200:4200 -p 9876:9876 -p 8000:8000 --network=internal music-hub /bin/bash
 ```
+in there
+```
+cd hub-app
+`npm bin`/ng serve --host=0.0.0.0
+`npm bin`/ng build -bh /
+cd ../server
+npm run build
+node dist/index.js
+```
+open [http://127.0.0.1:4200/](http://127.0.0.1:4200/)
+
 

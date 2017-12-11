@@ -1,0 +1,33 @@
+{
+	"name": "music-hub-server",
+	"version": "0.1.0",
+	"description": "music hub server",
+	"main": "index.js",
+	"directories": {
+		"doc": "docs"
+	},
+	"scripts": {
+		"build": "tsc",
+		"dev": "tsc --watch & nodemon dist",
+		"tsc": "tsc",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/cgreenhalgh/music-hub.git"
+	},
+	"author": "Chris Greenhalgh",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/cgreenhalgh/music-hub/issues"
+	},
+	"homepage": "https://github.com/cgreenhalgh/music-hub#readme",
+	"dependencies": {
+		"@types/node": "^8.0.53",
+		"body-parser": "^1.18.2",
+		"express": "^4.16.2"
+	},
+	"devDependencies": {
+		"typescript": "^2.6.2"
+	}
+}
