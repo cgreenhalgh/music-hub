@@ -3,7 +3,7 @@ CREATE DATABASE musichub
   DEFAULT COLLATE utf8_general_ci;
 
 -- musichub webserver mysql account (with limited access, e.g. can't change schema)
-CREATE USER musichub IDENTIFIED WITH sha256_password BY 'd2R4dWPtPN4zDIOsUvUyN67Tx98Wo5pu';
+CREATE USER musichub IDENTIFIED WITH mysql_native_password BY 'd2R4dWPtPN4zDIOsUvUyN67Tx98Wo5pu';
 GRANT DELETE,INSERT,EXECUTE,SELECT,UPDATE ON musichub.* TO 'musichub';
 
 USE musichub;

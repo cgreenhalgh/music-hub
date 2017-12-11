@@ -59,3 +59,28 @@ node dist/index.js
 open [http://127.0.0.1:4200/](http://127.0.0.1:4200/)
 
 
+## TODO
+
+MVP - see [designnotes API design](docs/designnotes.md#API%20design):
+
+- server database connection
+- server basic auth
+- server get account (check auth)
+- client log in
+- server get performances
+- client list performances (1)
+- server get performance
+- client show performance (2)
+- server get integrations
+- client show integrations (3)
+- server get integration detail
+- client show integration (4)
+- server update integration
+- client update integration
+- server update integration climb app (5)
+- server clear integration
+- client clear integration 
+- server clear integration climb app (6)
+- server integration-specific download
+- client integration-specific download
+- server climbapp MPM file download (7)
