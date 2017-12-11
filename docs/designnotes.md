@@ -40,6 +40,9 @@ There should be a custom app link for each performance (or pair of linked perfor
 - show one or two performances as appropriate
 - show past performances as appropriate that performance
 
+There should be an option to reset the app live performance state. This will:
+- delete the relevant entries from the app Redis (which links from muzicodes)
+
 There should be a music-performance-manager (MPM) configuration file download for each performance (or pair of linked performances). This will:
 - include the unique performance GUID(s)
 - include the appropriate archive upload URL and credentials
@@ -146,3 +149,45 @@ Actions are logged.
 
 Each log record has:
 - account, date/time, action, account?, work?, performance?, other info?
+
+For integration/plugin:
+- id, title (e.g. climbapp on mrl-music)
+- work(s)? performance(s)? (restrictions on applicability)
+- plugin code identifier (`climbapp`) (for looking up in internal registry/file loader)
+- configuration, e.g. passwords, hostnames, paths
+
+For performance (Climb!) app integration:
+- performance
+- integration
+- enabled
+- GUID (climb-specific?!)
+- (past performances?)
+
+## API design
+
+Web API. 
+
+Initially basic authentication. (order of priority)
+
+`GET /api/1/account` -> account info.
+
+`GET /api/1/works` -> array of works
+`GET /api/1/work/<WORK>` -> work info
+(1) `GET /api/1/work/<WORK>/performances` -> array of performances
+(2) `GET /api/1/performance/<PERFORMANCE>` -> performance info
+
+`PUT /api/1/performance/<PERFORMANCE>` -> edit performance info
+
+`POST /api/1/work/<WORK>/performances` -> add new performance
+
+(3) `GET /api/1/performance/<PERFORMANCE>/integrations` -> array of integrations (incl. disabled/possible?!)
+
+(4) `GET /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>` -> integration info (including links to integration-specific downloads?!)
+
+`PUT /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>` -> edit (create?!) integration info
+
+(5) `PUT /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>/update` -> update integration (e.g. export files)
+(6) `PUT /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>/clear` -> clear integration-related state (e.g. Climb! app redis state)
+
+(7) `GET /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>/download/<DOWNLOAD>` -> integration-specific download (e.g. MPM file?)
+
