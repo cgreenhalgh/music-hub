@@ -1,6 +1,7 @@
 import * as express from 'express'
 
-import { authenticate, AuthenticationError, getWorks } from './db'
+import { authenticate, getWork, getWorks, getPerformances } from './db'
+import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 
 const router = express.Router()
 
@@ -13,6 +14,22 @@ function badrequest(res, message:string) {
   console.log(`bad request: ${message}`)
   res.set('WWW-Authenticate', 'Basic realm=Authorization Required')
   return res.sendStatus(400)
+}
+
+function sendError(res, err:Error) {
+  if (err instanceof AuthenticationError)
+    unauthorized(res)
+  else if (err instanceof PermissionError) {
+    // forbidden
+    res.sendStatus(403)
+  } else if (err instanceof NotFoundError) {
+    // not found
+    res.sendStatus(404)
+  }
+  else {
+    console.log(`Internal error: ${err.message}`, err)
+    res.sendStatus(500)
+  }
 }
 
 router.use((req, res, next) => {
@@ -70,8 +87,48 @@ router.get('/works', (req, res) => {
     res.send(JSON.stringify(works))
   })
   .catch((err) => {
-    console.log(`Error getting works: ${err.message}`, err)
-    res.sendStatus(500)
+    sendError(res, err)
+  })
+})
+// GET work
+router.get('/work/:workid', (req, res) => {
+  var workid
+  try { workid = Number(req.params.workid) }
+  catch (err) {
+    console.log(`get /work/${req.params.workid} - not a number`)
+    res.setStatus(404)
+  }
+  //console.log(`get work ${workid}`)
+  getWork(req.user, workid)
+  .then((work) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(work))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// GET performances
+router.get('/work/:workid/performances', (req, res) => {
+  var workid
+  try { workid = Number(req.params.workid) }
+  catch (err) {
+    console.log(`get /work/${req.params.workid}/performances - not a number`)
+    res.setStatus(404)
+  }
+  getWork(req.user, workid)
+  .then((work) => {
+    getPerformances(req.user, work)
+    .then((perfs) => {
+      res.setHeader('Content-type', 'application/json')
+      res.send(JSON.stringify(perfs))
+    })
+    .catch((err) => {
+      sendError(res, err)
+    })
+  })
+  .catch((err) => {
+    sendError(res, err)
   })
 })
 

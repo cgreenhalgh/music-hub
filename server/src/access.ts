@@ -1,15 +1,7 @@
 import { Account, Work, Performance, Role, Recording } from './types'
 import { getRoles } from './db'
-
+//import { PermissionError } from './exceptions'
 // access control
-export class AccessError extends Error {
-  constructor(m: string) {
-    super(m);
-    // Set the prototype explicitly.
-    Object.setPrototypeOf(this, AccessError.prototype);
-  }
-}
-
 
 export enum Capability {
   //System capabilities:
@@ -44,7 +36,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
           resolve(true)
           return
         } else {
-          //reject(new AccessError(`${account.email} does not have Admin rights`))
+          //reject(new PermissionError(`${account.email} does not have Admin rights`))
           resolve(false)
           return
         }
@@ -54,7 +46,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
     else if (Capability.EditAccount==capability) {
       // admin or account
       if (!onaccount) {
-        //reject(new AccessError(`Edit account not specified`))
+        //reject(new PermissionError(`Edit account not specified`))
         resolve(false)
         return
       }
@@ -68,7 +60,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
           resolve(true)
           return
         } else {
-          //reject(new AccessError(`${account.email} does not have Admin rights`))
+          //reject(new PermissionError(`${account.email} does not have Admin rights`))
           resolve(false)
           return
         }
@@ -86,7 +78,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
           resolve(true)
           return
         } else {
-          //reject(new AccessError(`${account.email} does not have Admin or publisher rights`))
+          //reject(new PermissionError(`${account.email} does not have Admin or publisher rights`))
           resolve(false)
           return
         }
@@ -95,7 +87,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
     } else if (Capability.EditWork==capability || Capability.EditRolesWork==capability || Capability.CreateWorkPerformance==capability || Capability.EditRolesPerformance==capability) {
       // owner?
       if (!work) {
-        //reject(new AccessError(`Edit work not specified`))
+        //reject(new PermissionError(`Edit work not specified`))
         resolve(false)
         return
       }
@@ -105,7 +97,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
           resolve(true)
           return
         } else {
-          //reject(new AccessError(`${account.email} does not have Owner rights on ${work.title}`))
+          //reject(new PermissionError(`${account.email} does not have Owner rights on ${work.title}`))
           resolve(false)
           return
         }
@@ -119,12 +111,12 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
       // view public?
       // PerformanceManager or owner of work
       if (!performance) {
-        //reject(new AccessError(`performance not specified`))
+        //reject(new PermissionError(`performance not specified`))
         resolve(false)
         return
       }
       if (!work) {
-        //reject(new AccessError(`performance work not specified`))
+        //reject(new PermissionError(`performance work not specified`))
         resolve(false)
         return
       }
@@ -146,7 +138,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
           resolve(true)
           return
         } else {
-          //reject(new AccessError(`${account.email} does not have Edit rights on ${work.title} ${performance.title}`))
+          //reject(new PermissionError(`${account.email} does not have Edit rights on ${work.title} ${performance.title}`))
           resolve(false)
           return
         }
@@ -155,18 +147,18 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
     } else if (Capability.DownloadPerformance==capability || Capability.CreateRecording==capability || Capability.EditRecording==capability || Capability.ViewRecording==capability) {
       // performance manager
       if (!performance) {
-        //reject(new AccessError(`performance not specified`))
+        //reject(new PermissionError(`performance not specified`))
         resolve(false)
         return
       }
       if (!work) {
-        //reject(new AccessError(`performance work not specified`))
+        //reject(new PermissionError(`performance work not specified`))
         resolve(false)
         return
       }
       if (Capability.EditRecording==capability || Capability.ViewRecording==capability) {
         if (!recording) {
-          //reject(new AccessError(`recording not specified`))
+          //reject(new PermissionError(`recording not specified`))
           resolve(false)
           return
         }
@@ -182,7 +174,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
           resolve(true)
           return
         } else {
-          //reject(new AccessError(`${account.email} does not have performance management rights on ${work.title} ${performance.title}`))
+          //reject(new PermissionError(`${account.email} does not have performance management rights on ${work.title} ${performance.title}`))
           resolve(false)
           return
         }
@@ -191,7 +183,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
     }
     else {
       console.log(`Error: unchecked capability ${capability}`)
-      //reject(new AccessError(`unknown capability ${capability}`))
+      //reject(new PermissionError(`unknown capability ${capability}`))
       resolve(false)
     }
   })

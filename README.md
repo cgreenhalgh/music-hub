@@ -63,6 +63,8 @@ open [http://127.0.0.1:4200/](http://127.0.0.1:4200/)
 ```
 curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/account
 curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/works
+curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/work/1
+curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/work/1/performances
 ```
 
 
