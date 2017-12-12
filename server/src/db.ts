@@ -1,6 +1,6 @@
 // database
 import * as mysql from 'mysql'
-import { Account, RoleAssignment, Role, Work, Performance } from './types'
+import { Account, RoleAssignment, Role, Work, Performance, Plugin, PluginSetting, PerformanceIntegration } from './types'
 import { Capability, hasCapability } from './access'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 
@@ -169,6 +169,24 @@ export function getWork(account:Account, workid:number) : Promise<Work> {
     
   })
 }
+
+function bit2boolean(bit:any) : boolean {
+  if (!bit)
+    return null
+  if (bit.data && bit.data[0])
+    return true
+  return false
+}
+function mapPerformance(result:any) : Performance {
+  if (!result)
+    return null
+  let ispublic = result.public
+  delete result.public
+  let perf:Performance = result as Performance
+  perf.ispublic = bit2boolean(ispublic)
+  return perf
+}
+
 export function getPerformances(account:Account, work:Work) : Promise<Performance[]> {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, con) => {
@@ -188,7 +206,7 @@ export function getPerformances(account:Account, work:Work) : Promise<Performanc
             return
           }
           con.release()
-          let perfs:Performance[] = results.map((r) => r as Performance)
+          let perfs:Performance[] = results.map((r) => mapPerformance(r))
           let accessps:Promise<boolean>[] = perfs.map((perf) => hasCapability(account, Capability.ViewPerformance, work, perf))
           Promise.all(accessps).then((accesses) => {
             let fperfs:Performance[] = []
@@ -206,5 +224,208 @@ export function getPerformances(account:Account, work:Work) : Promise<Performanc
       })
     })
     
+  })
+}
+
+export function getPerformance(account:Account, performanceid:number) : Promise<Performance> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `performance` WHERE `id` = ?'
+      let params = [performanceid]
+      con.query(query, params, (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getPerformance select: ${err.message}`)
+            reject(err)
+            return
+          }
+          con.release()
+          if (results.length==0) {
+            reject(new NotFoundError(`performance ${performanceid} not found`))
+            return
+          }
+          let perf:Performance = mapPerformance(results[0])
+          getWork(account, perf.workid)
+          .then((work) => {
+            perf.work = work;
+            return hasCapability(account, Capability.ViewPerformance, work, perf)
+            .then((access) => {
+              if (access) {
+                resolve(perf)
+              } else {
+                reject(new PermissionError(`performance ${performanceid} not accessible to ${account.email}`))
+              }
+            })
+          })
+          .catch((err) => {
+            console.log(`Error checking access to performance ${performanceid} of work ${perf.workid}: ${err.message}`, err)
+            reject(err)
+          })
+      })
+    })
+    
+  })
+}
+
+function mapPerformanceIntegration(result:any) : PerformanceIntegration {
+  if (!result)
+    return null
+  let perfint:PerformanceIntegration = result as PerformanceIntegration
+  perfint.enabled = bit2boolean(perfint.enabled)
+  return perfint
+}
+export function getPerformanceIntegrations(account:Account, performanceid:number) : Promise<PerformanceIntegration[]> {
+  return new Promise((resolve, reject) => {
+    getPerformance(account, performanceid)
+    .then((performance) => {
+      // any extra permission check beyond view performance??
+      pool.getConnection((err, con) => {
+        if (err) {
+          console.log(`Error getting connection: ${err.message}`)
+          reject(err)
+          return
+        }
+        // Use the connection
+        let query = 'SELECT * FROM `performance_integration` WHERE `performanceid` = ?'
+        let params = [performanceid]
+        con.query(query, params, (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getPerformanceIntegrations select: ${err.message}`)
+            reject(err)
+            return
+          }
+          let perfints:PerformanceIntegration[] = results.map((r) => mapPerformanceIntegration(r))
+          // add plugins (objects)
+          con.query('SELECT * FROM `plugin`', (err, results, fields) => {
+            if (err) {
+              con.release()
+              console.log(`Error doing plugin select: ${err.message}`)
+              reject(err)
+              return
+            }
+            con.release()
+            let allperfints:PerformanceIntegration[] = []
+            let plugins: Plugin[] = results.map((r) => r as Plugin)
+            for (let perfint of perfints) {
+              let plugin = plugins.find((p) => p.id == perfint.pluginid)
+              perfint.plugin = plugin
+              allperfints.push(perfint)
+            }
+            // add other plugins as 'disabled' integrations
+            for (let plugin of plugins) {
+              let perfint = perfints.find((pi) => pi.pluginid == plugin.id)
+              if (!perfint) {
+                let perfint:PerformanceIntegration = {
+                  id:0, // ??? hack ???
+                  performanceid: performanceid,
+                  pluginid: plugin.id,
+                  plugin: plugin,
+                  enabled: false,
+                  guid: null
+                }
+                allperfints.push(perfint)
+              }
+            }
+            resolve(perfints)
+          })
+        })
+      })
+    })
+    .catch((err) => reject(err))
+  })
+}
+// no perm check here - low-level
+function getPlugin(pluginid:number): Promise<Plugin> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `plugin` WHERE `id` = ?'
+      let params = [pluginid]
+      con.query(query, params, (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing getPlugin select: ${err.message}`)
+          reject(err)
+          return
+        }
+        if (results.length==0) {
+          con.release()
+          reject(new NotFoundError(`plugin ${pluginid} not found`))
+        }
+        let plugin:Plugin = results[0] as Plugin
+        // TODO settings
+        con.query('SELECT `name`, `value` FROM `plugin_setting` WHERE `pluginid` = ?', [pluginid], (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getPlugin select: ${err.message}`)
+            reject(err)
+            return
+          }
+          con.release()
+          plugin.settings = results.map((s) => s as PluginSetting)
+          resolve(plugin)
+        })
+      })
+    })
+  })
+}
+
+export function getPerformanceIntegration(account:Account, performanceid:number, pluginid:number) : Promise<PerformanceIntegration> {
+  return new Promise((resolve, reject) => {
+    getPerformance(account, performanceid)
+    .then((performance) => {
+      return getPlugin(pluginid)
+      .then((plugin) => {
+        // any extra permission check beyond view performance??
+        pool.getConnection((err, con) => {
+          if (err) {
+            console.log(`Error getting connection: ${err.message}`)
+            reject(err)
+            return
+          }
+          // Use the connection
+          let query = 'SELECT * FROM `performance_integration` WHERE `performanceid` = ? AND `pluginid` = ?'
+          let params = [performanceid, pluginid]
+          con.query(query, params, (err, results, fields) => {
+            if (err) {
+              con.release()
+              console.log(`Error doing getPerformanceIntegration select: ${err.message}`)
+              reject(err)
+              return
+            }
+            if (results.length==0) {
+              // fake / disabled
+              let perfint:PerformanceIntegration = {
+                id:0, // ??? hack ???
+                performanceid: performanceid,
+                pluginid: plugin.id,
+                plugin: plugin,
+                enabled: false,
+                guid: null
+              }
+              resolve(perfint)
+              return
+            }
+            let perfint:PerformanceIntegration = mapPerformanceIntegration(results[0])
+            perfint.plugin = plugin
+            resolve(perfint)
+            return
+          })
+        })
+      })
+    })
+    .catch((err) => reject(err))
   })
 }

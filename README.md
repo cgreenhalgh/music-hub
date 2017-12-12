@@ -65,6 +65,9 @@ curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/a
 curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/works
 curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/work/1
 curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/work/1/performances
+curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1
+curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integrations
+curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integration/1
 ```
 
 
@@ -73,13 +76,9 @@ curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/a
 MVP - see [designnotes API design](docs/designnotes.md#API%20design):
 
 - client log in
-- server get performances
 - client list performances (1)
-- server get performance
 - client show performance (2)
-- server get integrations
 - client show integrations (3)
-- server get integration detail
 - client show integration (4)
 - server update integration
 - client update integration

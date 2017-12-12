@@ -54,3 +54,25 @@ export interface Recording {
 // TODO finish recording
   ispublic:boolean
 }
+
+export interface PluginSetting {
+  name:string
+  value:string
+}
+
+export interface Plugin {
+  id:number
+  title:string
+  code:string
+  settings?:PluginSetting[]
+}
+
+export interface PerformanceIntegration {
+  id:number
+  performanceid:number
+  performance?:Performance
+  pluginid:number
+  plugin?:Plugin
+  enabled:boolean
+  guid?:string
+}

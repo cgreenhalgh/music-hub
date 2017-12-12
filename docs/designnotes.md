@@ -182,12 +182,12 @@ Initially basic authentication. (order of priority)
 
 (3) `GET /api/1/performance/<PERFORMANCE>/integrations` -> array of integrations (incl. disabled/possible?!)
 
-(4) `GET /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>` -> integration info (including links to integration-specific downloads?!)
+(4) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> integration info (including links to integration-specific downloads?!)
 
-`PUT /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>` -> edit (create?!) integration info
+`PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> edit (create?!) integration info
 
-(5) `PUT /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>/update` -> update integration (e.g. export files)
-(6) `PUT /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>/clear` -> clear integration-related state (e.g. Climb! app redis state)
+(5) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/update` -> update integration (e.g. export files)
+(6) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/clear` -> clear integration-related state (e.g. Climb! app redis state)
 
-(7) `GET /api/1/performance/<PERFORMANCE>/integration/<INTEGRATION>/download/<DOWNLOAD>` -> integration-specific download (e.g. MPM file?)
+(7) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/download/<DOWNLOAD>` -> integration-specific download (e.g. MPM file?)
 

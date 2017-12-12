@@ -1,6 +1,6 @@
 import * as express from 'express'
 
-import { authenticate, getWork, getWorks, getPerformances } from './db'
+import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, getPerformanceIntegration } from './db'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 
 const router = express.Router()
@@ -131,10 +131,71 @@ router.get('/work/:workid/performances', (req, res) => {
     sendError(res, err)
   })
 })
+// GET performance
+router.get('/performance/:performanceid', (req, res) => {
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    console.log(`get /performance/${req.params.performanceid} - not a number`)
+    res.setStatus(404)
+  }
+  //console.log(`get work ${workid}`)
+  getPerformance(req.user, performanceid)
+  .then((work) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(work))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+
+// GET performance integrations
+router.get('/performance/:performanceid/integrations', (req, res) => {
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    console.log(`get /performance/${req.params.performanceid}/integrations - not a number`)
+    res.setStatus(404)
+  }
+  //console.log(`get work ${workid}`)
+  getPerformanceIntegrations(req.user, performanceid)
+  .then((perfints) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(perfints))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// GET performance integration
+router.get('/performance/:performanceid/integration/:pluginid', (req, res) => {
+  var performanceid, pluginid
+  try { 
+    performanceid = Number(req.params.performanceid);
+    pluginid = Number(req.params.pluginid); 
+  }
+  catch (err) {
+    console.log(`get /performance/${req.params.performanceid}/integration/${req.params.pluginid} - not a number`)
+    res.setStatus(404)
+  }
+  //console.log(`get work ${workid}`)
+  getPerformanceIntegration(req.user, performanceid, pluginid)
+  .then((perfint) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(perfint))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
 
 /* GET api listing. */
 router.get('/', (req, res) => {
   res.send('api works');
 })
 
+router.all('*', (req, res) => {
+  res.sendStatus(404)
+})
 module.exports = router
