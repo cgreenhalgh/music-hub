@@ -1,0 +1,27 @@
+<div class="row">
+  <div class="col-12">
+    <div *ngIf="login.error" class="alert alert-danger">Error logging in: {{login.error}}</div>
+    
+    <div *ngIf="!!login.account" class="alert alert-success">Logged in as as {{login.account.nickname}}</div>
+    <div *ngIf="login.state==2" class="alert alert-info">Logging in...</div>
+    <div *ngIf="login.state==1">
+     <p>Log in:</p>
+    
+     <form (ngSubmit)="onSubmit()" #accountForm="ngForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="text" class="form-control" name="email" id="email" [(ngModel)]="email" required>
+      </div>
+ 
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" name="password" id="password" [(ngModel)]="password" required>
+      </div>
+ 
+      <button type="submit" class="btn btn-success" [disabled]="!accountForm.form.valid">Submit</button>
+ 
+     </form>
+    </div>
+    <button *ngIf="!!login.account" (click)="onLogout()" class="button">Log out</button>
+  </div>
+</div>

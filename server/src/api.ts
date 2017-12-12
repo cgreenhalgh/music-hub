@@ -32,6 +32,22 @@ function sendError(res, err:Error) {
   }
 }
 
+// allow cross-domain for testing
+router.use((req, res, next) => {
+  //console.log('add Access-Control-Allow-Origin')
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  //intercepts OPTIONS method
+  if ('OPTIONS' === req.method) {
+    //respond with 200
+    res.set('WWW-Authenticate', 'Basic realm=Authorization Required')
+    res.send(200);
+  } else {
+    next()
+  }
+})
+
 router.use((req, res, next) => {
   let authorization = req.headers.authorization
   if (req.user) return next()
