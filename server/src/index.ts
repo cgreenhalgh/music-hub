@@ -9,6 +9,13 @@ import * as bodyParser from 'body-parser'
 // Get our API routes
 import * as api from './api'
 
+// bootstrap plugins
+import { PluginProvider, registerPlugin } from './plugins'
+import { PerformanceIntegration } from './types'
+
+import { ClimbappPlugin } from './plugin-climbapp'
+registerPlugin('climbapp', (perfint:PerformanceIntegration) => new ClimbappPlugin(perfint))
+
 const app = express()
 
 // Parsers for POST data

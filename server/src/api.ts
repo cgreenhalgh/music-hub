@@ -3,6 +3,7 @@ import * as express from 'express'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, getPerformanceIntegration } from './db'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 import { Capability, hasCapability } from './access'
+import { PluginProvider, getPlugin } from './plugins'
 
 const router = express.Router()
 
@@ -22,16 +23,16 @@ function sendError(res, err:Error) {
     unauthorized(res)
   else if (err instanceof PermissionError) {
     // forbidden
-    res.setStatus(403)
+    res.status(403)
     res.send(err.message)
   } else if (err instanceof NotFoundError) {
     // not found
-    res.setStatus(404)
+    res.status(404)
     res.send(err.message)
   }
   else {
     console.log(`Internal error: ${err.message}`, err)
-    res.setStatus(500)
+    res.status(500)
     res.send(err.message)
   }
 }
@@ -232,7 +233,7 @@ router.post('/performance/:performanceid/integration/:pluginid/update', (req, re
     console.log(`update performance ${perfint.performanceid} plugin ${perfint.pluginid} by ${req.user.email}`)
     // enabled?
     if (!perfint.enabled) {
-      res.setStatus(409) // conflict
+      res.status(409) // conflict
       res.send('integration is disabled')
       return;
     }
@@ -244,7 +245,14 @@ router.post('/performance/:performanceid/integration/:pluginid/update', (req, re
         sendError(res, new PermissionError('user does not have manage-performance-integration capability'))
         return
       } 
-      // TODO actually do something...!
+      // actually do something...!
+      let plugin = getPlugin(perfint)
+      if (!plugin) {
+        res.status(500)
+        res.send(`Implementation for plugin ${perfint.plugin.code} not found`)
+        return
+      }
+      plugin.update()
       // TODO request-specific return value?
       res.setHeader('Content-type', 'application/json')
       res.send(JSON.stringify({message:'working on it...'}))
