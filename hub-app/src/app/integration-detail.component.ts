@@ -6,6 +6,12 @@ import { ApiService } from './api.service'
 
 import 'rxjs/add/operator/switchMap';
 
+interface ActionRecord {
+  text:string
+  success?:boolean
+  error?:boolean
+}
+
 @Component({
   selector: 'hub-work',
   templateUrl: './integration-detail.component.html'
@@ -14,6 +20,7 @@ export class IntegrationDetailComponent implements OnInit {
   perfint:PerformanceIntegration = null
   error:string = null
   loading:boolean = true
+  actions:ActionRecord[] = [ {text:'test'} ]
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -33,5 +40,20 @@ export class IntegrationDetailComponent implements OnInit {
           (err) => { this.error = err.message; this.loading=false }
         )
       })
+  }
+  doUpdate(): void {
+    console.log(`doUpdate on performance ${this.perfint.performanceid} plugin ${this.perfint.pluginid}`)
+    let action:ActionRecord = { text: 'request update...' }
+    this.actions.push(action)
+    this.api.updateIntegration(String(this.perfint.performanceid), String(this.perfint.pluginid)).
+    subscribe((res) => {
+        action.success = true
+        action.text = 'Updated: '+res
+      },
+      (err) => {
+        action.error = true
+        action.text = 'Error doing update: '+this.api.getMessageForError(err)
+      }
+    )
   }
 }

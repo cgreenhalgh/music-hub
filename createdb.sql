@@ -51,7 +51,7 @@ CREATE TABLE musichub.performance (
 	date DATE,
 	time TIME,
 	timezone VARCHAR(20),
-	public BIT(1) NOT NULL DEFAULT 0,
+	public TINYINT NOT NULL DEFAULT 0,
 	status VARCHAR(20) NOT NULL,
 	linked_performanceid SMALLINT UNSIGNED,
 	PRIMARY KEY (id),
@@ -134,7 +134,7 @@ CREATE TABLE musichub.performance_integration (
 	id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	performanceid SMALLINT UNSIGNED NOT NULL,
 	pluginid SMALLINT UNSIGNED NOT NULL,
-	enabled BIT(1) NOT NULL DEFAULT 0,
+	enabled TINYINT NOT NULL DEFAULT 0,
 	guid VARCHAR(100),
 	PRIMARY KEY (id),
 	FOREIGN KEY (performanceid) REFERENCES musichub.performance(id),
@@ -142,5 +142,5 @@ CREATE TABLE musichub.performance_integration (
 );
 
 -- Climb! performances app integration(s)
-INSERT INTO musichub.performance_integration (performanceid, pluginid) VALUES (1, 1);
-INSERT INTO musichub.performance_integration (performanceid, pluginid) VALUES (2, 1);
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled) VALUES (1, 1, 1);
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled) VALUES (2, 1, 1);

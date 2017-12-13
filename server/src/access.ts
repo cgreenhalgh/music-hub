@@ -21,6 +21,7 @@ export enum Capability {
   EditRolesPerformance = 'edit-roles-performance',
   DownloadPerformance = 'download-performance',
   CreateRecording = 'create-recording',
+  ManagePerformanceIntegration = 'manage-performance-integration',
   // Capabilities in relation to a recording:
   EditRecording = 'edit-recording',
   ViewRecording = 'view-recording'
@@ -144,7 +145,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
         }
       })
       .catch((err) => { reject(err) })
-    } else if (Capability.DownloadPerformance==capability || Capability.CreateRecording==capability || Capability.EditRecording==capability || Capability.ViewRecording==capability) {
+    } else if (Capability.DownloadPerformance==capability || Capability.ManagePerformanceIntegration==capability || Capability.CreateRecording==capability || Capability.EditRecording==capability || Capability.ViewRecording==capability) {
       // performance manager
       if (!performance) {
         //reject(new PermissionError(`performance not specified`))

@@ -86,6 +86,8 @@ System capabilities:
 - `edit-account`
 - `manage-account`, e.g. block
 - `view-account`
+- `crete-plugin`
+- `manage-plugin`
 
 Capabilities in relation to a work:
 - `create-work`
@@ -100,6 +102,7 @@ Capabilities in relation to a performance:
 - `edit-roles-performance`
 - `download-performance`
 - `create-recording`
+- `manage-performance-integration`
 
 Capabilities in relation to a recording:
 - `edit-recording`

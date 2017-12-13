@@ -64,13 +64,7 @@ export class ApiService {
          this.loginSubject.next(nl)
        },
        (err) => {
-         let error = 'Login error'
-         if (err.error instanceof Error) {
-           // A client-side or network error occurred. Handle it accordingly.
-           error = err.error.message
-         } else {
-           error = `Server returned status ${err.status}`
-         }
+         let error = this.getMessageForError(err)
          console.log(`login error ${error}`)
          let nl:Login = { 
            username: username,
@@ -108,5 +102,19 @@ export class ApiService {
   }
   getPerformanceIntegration(performanceid:string, pluginid:string): Observable<PerformanceIntegration> {
     return this.http.get<PerformanceIntegration>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid), {headers:this.getHeaders()})
+  }
+  // TODO precise return type
+  updateIntegration(performanceid:string, pluginid:string): Observable<any> {
+    return this.http.post<any>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid)+'/update', null, {headers:this.getHeaders()})
+  }
+  getMessageForError(err):string {
+    let error = 'Error making request to server'
+    if (err.error instanceof Error) {
+      // A client-side or network error occurred. Handle it accordingly.
+      error = err.error.message
+    } else {
+      error = `Server returned status ${err.status}`
+    }
+    return error
   }
 }

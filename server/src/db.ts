@@ -171,9 +171,9 @@ export function getWork(account:Account, workid:number) : Promise<Work> {
 }
 
 function bit2boolean(bit:any) : boolean {
-  if (!bit)
+  if (bit===null)
     return null
-  if (bit.data && bit.data[0])
+  if (bit)
     return true
   return false
 }
@@ -363,6 +363,7 @@ function getPlugin(pluginid:number): Promise<Plugin> {
         if (results.length==0) {
           con.release()
           reject(new NotFoundError(`plugin ${pluginid} not found`))
+          return
         }
         let plugin:Plugin = results[0] as Plugin
         // TODO settings

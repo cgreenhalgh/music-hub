@@ -12,7 +12,15 @@
       <p>Venue: {{perfint.performance.venue_title}}</p>
       <p>Performance Status: {{perfint.performance.status}}</p>
       <p>GUID: {{ perfint.guid }}</p>
-      <!-- TODO: actions... -->
+      <h3>Actions</h3>
+      <ul>
+        <div *ngFor="let action of actions" class="alert" [ngClass]="{'alert-danger':action.error,'alert-success':action.success,'alert-info':(!action.success && !action.error)}">{{action.text}}</div>
+      </ul>
+      <div>
+        <!-- TODO disable depending on role? enabled? -->
+        <button class="button" (click)="doUpdate()" [disabled]="!perfint.enabled">Update</button>
+        <!-- TODO: other actions... -->
+      </div>
     </div>
   </div>
 </div>

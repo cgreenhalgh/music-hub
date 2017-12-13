@@ -2,6 +2,7 @@ import * as express from 'express'
 
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, getPerformanceIntegration } from './db'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
+import { Capability, hasCapability } from './access'
 
 const router = express.Router()
 
@@ -21,14 +22,17 @@ function sendError(res, err:Error) {
     unauthorized(res)
   else if (err instanceof PermissionError) {
     // forbidden
-    res.sendStatus(403)
+    res.setStatus(403)
+    res.send(err.message)
   } else if (err instanceof NotFoundError) {
     // not found
-    res.sendStatus(404)
+    res.setStatus(404)
+    res.send(err.message)
   }
   else {
     console.log(`Internal error: ${err.message}`, err)
-    res.sendStatus(500)
+    res.setStatus(500)
+    res.send(err.message)
   }
 }
 
@@ -42,7 +46,7 @@ router.use((req, res, next) => {
   if ('OPTIONS' === req.method) {
     //respond with 200
     res.set('WWW-Authenticate', 'Basic realm=Authorization Required')
-    res.send(200);
+    res.sendStatus(200);
   } else {
     next()
   }
@@ -113,7 +117,8 @@ router.get('/work/:workid', (req, res) => {
   try { workid = Number(req.params.workid) }
   catch (err) {
     console.log(`get /work/${req.params.workid} - not a number`)
-    res.setStatus(404)
+    res.sendStatus(404)
+    return
   }
   //console.log(`get work ${workid}`)
   getWork(req.user, workid)
@@ -131,7 +136,8 @@ router.get('/work/:workid/performances', (req, res) => {
   try { workid = Number(req.params.workid) }
   catch (err) {
     console.log(`get /work/${req.params.workid}/performances - not a number`)
-    res.setStatus(404)
+    res.sendStatus(404)
+    return
   }
   getWork(req.user, workid)
   .then((work) => {
@@ -154,7 +160,8 @@ router.get('/performance/:performanceid', (req, res) => {
   try { performanceid = Number(req.params.performanceid) }
   catch (err) {
     console.log(`get /performance/${req.params.performanceid} - not a number`)
-    res.setStatus(404)
+    res.sendStatus(404)
+    return
   }
   //console.log(`get work ${workid}`)
   getPerformance(req.user, performanceid)
@@ -173,7 +180,8 @@ router.get('/performance/:performanceid/integrations', (req, res) => {
   try { performanceid = Number(req.params.performanceid) }
   catch (err) {
     console.log(`get /performance/${req.params.performanceid}/integrations - not a number`)
-    res.setStatus(404)
+    res.sendStatus(404)
+    return
   }
   //console.log(`get work ${workid}`)
   getPerformanceIntegrations(req.user, performanceid)
@@ -194,13 +202,53 @@ router.get('/performance/:performanceid/integration/:pluginid', (req, res) => {
   }
   catch (err) {
     console.log(`get /performance/${req.params.performanceid}/integration/${req.params.pluginid} - not a number`)
-    res.setStatus(404)
+    res.sendStatus(404)
+    return
   }
   //console.log(`get work ${workid}`)
   getPerformanceIntegration(req.user, performanceid, pluginid)
   .then((perfint) => {
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(perfint))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// update performance integration
+router.post('/performance/:performanceid/integration/:pluginid/update', (req, res) => {
+  var performanceid, pluginid
+  try { 
+    performanceid = Number(req.params.performanceid);
+    pluginid = Number(req.params.pluginid); 
+  }
+  catch (err) {
+    console.log(`post /performance/${req.params.performanceid}/integration/${req.params.pluginid} - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  getPerformanceIntegration(req.user, performanceid, pluginid)
+  .then((perfint) => {
+    console.log(`update performance ${perfint.performanceid} plugin ${perfint.pluginid} by ${req.user.email}`)
+    // enabled?
+    if (!perfint.enabled) {
+      res.setStatus(409) // conflict
+      res.send('integration is disabled')
+      return;
+    }
+    // extra permission check - capability manage-performance-integration
+    // work and performance should be populated by getPerformanceIntegration
+    hasCapability(req.user, Capability.ManagePerformanceIntegration, perfint.performance.work, perfint.performance)
+    .then((access) => {
+      if (!access) {
+        sendError(res, new PermissionError('user does not have manage-performance-integration capability'))
+        return
+      } 
+      // TODO actually do something...!
+      // TODO request-specific return value?
+      res.setHeader('Content-type', 'application/json')
+      res.send(JSON.stringify({message:'working on it...'}))
+    })
   })
   .catch((err) => {
     sendError(res, err)
