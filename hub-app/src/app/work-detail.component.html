@@ -1,0 +1,17 @@
+<div class="row">
+  <div class="col-12">
+    <div *ngIf="error" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading">Loading work...</div>
+    <div *ngIf="!!work">
+      <h2>{{ work.title }} ({{work.year}})</h2>
+    </div>
+    <h3>Performances</h3>
+    <div *ngIf="error2" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading2">Loading performances...</div>
+    <ul>
+      <li *ngFor="let performance of performances">
+        <a [routerLink]="['/performance',performance.id]" >{{performance.title}}</a>
+      </li>
+    </ul>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { ApiService, Login, LoginState } from './api.service'
 import { Account } from './types'
@@ -7,7 +7,7 @@ import { Account } from './types'
   selector: 'account',
   templateUrl: './account.component.html'
 })
-export class AccountComponent implements OnInit {
+export class AccountComponent implements OnInit, OnDestroy {
   account:Account
   email:string
   password:string

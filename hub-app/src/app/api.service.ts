@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Account } from './types'
+import { Account, Work, Performance } from './types'
 
 export enum LoginState {
   LoggedOut = 1,
@@ -32,6 +32,18 @@ export class ApiService {
 
   watchLogin():BehaviorSubject<Login> { return this.loginSubject; }
 
+  getHeaders(): HttpHeaders {
+    let l = this.loginSubject.getValue()
+    if (l.username && l.password) {
+      let auth="Basic "+ btoa(l.username + ":" + l.password);
+      console.log(`api call with ${l.username} ${l.password}`)
+      return new HttpHeaders({'Authorization': auth})
+     } else {
+      console.log(`Warning: api call without username/password`)
+      return new HttpHeaders({})
+    } 
+  }
+
   login(username:string, password:string) {
     let nl:Login = { 
       username: username,
@@ -39,15 +51,13 @@ export class ApiService {
       state: LoginState.LoggingIn
     }
     this.loginSubject.next(nl)
-    let auth="Basic "+ btoa(username + ":" + password);
-    let headers = new HttpHeaders({'Authorization': auth})
-    this.http.get<Account>(this.apiUrl+'/account', {headers:headers})
+    this.http.get<Account>(this.apiUrl+'/account', {headers:this.getHeaders()})
     .subscribe(
        (res) => {
          console.log(`login -> ${res}`)
          let nl:Login = { 
            username: username,
-           password: '',
+           password: password,
            state: LoginState.LoggedIn,
            account: res as Account
          }
@@ -81,8 +91,13 @@ export class ApiService {
     }
     this.loginSubject.next(nl)
   }
-  getAccount() : Observable<Account> {
-    console.log(`getAccount from ${this.apiUrl}`)
-    return this.http.get<Account>(this.apiUrl+'/account')
+  getWorks(): Observable<Work[]> {
+    return this.http.get<Work[]>(this.apiUrl+'/works', {headers:this.getHeaders()})
+  }
+  getWork(workid:string): Observable<Work> {
+    return this.http.get<Work>(this.apiUrl+'/work/'+encodeURIComponent(workid), {headers:this.getHeaders()})
+  }
+  getPerformancesOfWork(workid:string): Observable<Performance[]> {
+    return this.http.get<Performance[]>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/performances', {headers:this.getHeaders()})
   }
 }

@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="col-12">
+    <div *ngIf="error" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading">Loading works...</div>
+    <ul>
+      <li *ngFor="let work of works">
+        <a [routerLink]="['/work',work.id]" >{{ work.title }} ({{work.year}})</a>
+      </li>
+    </ul>
+  </div>
+</div>
