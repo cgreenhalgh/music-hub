@@ -75,9 +75,6 @@ curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/a
 
 MVP - see [designnotes API design](docs/designnotes.md#API%20design):
 
-- client show performance (2)
-- client show integrations (3)
-- client show integration (4)
 - server update integration
 - client update integration
 - server update integration climb app (5)

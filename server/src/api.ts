@@ -91,6 +91,7 @@ router.get('/account', (req, res) => {
     console.log(`Error: GET /account with null req.user`)
     return unauthorized(res)
   }
+  // TODO get roles
   res.setHeader('Content-type', 'application/json')
   res.send(JSON.stringify(req.user))
 })

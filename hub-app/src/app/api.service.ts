@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Account, Work, Performance } from './types'
+import { Account, Work, Performance, PerformanceIntegration } from './types'
 
 export enum LoginState {
   LoggedOut = 1,
@@ -99,5 +99,14 @@ export class ApiService {
   }
   getPerformancesOfWork(workid:string): Observable<Performance[]> {
     return this.http.get<Performance[]>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/performances', {headers:this.getHeaders()})
+  }
+  getPerformance(performanceid:string): Observable<Performance> {
+    return this.http.get<Performance>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid), {headers:this.getHeaders()})
+  }
+  getPerformanceIntegrations(performanceid:string): Observable<PerformanceIntegration[]> {
+    return this.http.get<PerformanceIntegration[]>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integrations', {headers:this.getHeaders()})
+  }
+  getPerformanceIntegration(performanceid:string, pluginid:string): Observable<PerformanceIntegration> {
+    return this.http.get<PerformanceIntegration>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid), {headers:this.getHeaders()})
   }
 }

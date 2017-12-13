@@ -1,0 +1,21 @@
+<div class="row">
+  <div class="col-12">
+    <div *ngIf="error" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading">Loading performance...</div>
+    <div *ngIf="!!performance">
+      <h2>Performance: {{performance.title}}</h2>
+      <p *ngIf="performance.work">Work: {{ performance.work.title }} ({{performance.work.year}})</p>
+      <p>Performer: {{performance.performer_title}}</p>
+      <p>Venue: {{performance.venue_title}}</p>
+      <p>Status: {{performance.status}}</p>
+    </div>
+    <h3>Tools</h3>
+    <div *ngIf="error2" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading2">Loading plugins...</div>
+    <ul>
+      <li *ngFor="let perfint of performanceIntegrations">
+        <a [routerLink]="['/performance',performance.id,'integration',perfint.id]" >{{perfint.plugin.title}} ({{perfint.plugin.code}})</a>, Enabled: {{perfint.enabled}}
+      </li>
+    </ul>
+  </div>
+</div>

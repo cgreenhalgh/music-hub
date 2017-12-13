@@ -3,7 +3,7 @@
     <div *ngIf="error" class="alert alert-danger">Error: {{error}}</div>
     <div *ngIf="loading">Loading work...</div>
     <div *ngIf="!!work">
-      <h2>{{ work.title }} ({{work.year}})</h2>
+      <h2>Work: {{ work.title }} ({{work.year}})</h2>
     </div>
     <h3>Performances</h3>
     <div *ngIf="error2" class="alert alert-danger">Error: {{error}}</div>

@@ -4,6 +4,7 @@ export interface Account {
   // passwordhash:string
   nickname:string
   description:string
+  roles?:RoleAssignment[]
 }
 
 export interface Work {
@@ -26,7 +27,7 @@ export interface Performance {
   venue_title:string
   date?:string //DATE,
   time?:string //TIME,
-  timezone:string // VARCHAR(20),
+  timezone?:string // VARCHAR(20),
   ispublic:boolean
   status:string
   linked_performanceid:number

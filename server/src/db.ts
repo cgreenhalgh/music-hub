@@ -410,6 +410,7 @@ export function getPerformanceIntegration(account:Account, performanceid:number,
               let perfint:PerformanceIntegration = {
                 id:0, // ??? hack ???
                 performanceid: performanceid,
+                performance: performance,
                 pluginid: plugin.id,
                 plugin: plugin,
                 enabled: false,
@@ -420,6 +421,7 @@ export function getPerformanceIntegration(account:Account, performanceid:number,
             }
             let perfint:PerformanceIntegration = mapPerformanceIntegration(results[0])
             perfint.plugin = plugin
+            perfint.performance = performance
             resolve(perfint)
             return
           })

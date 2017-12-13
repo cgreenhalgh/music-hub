@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="col-12">
+    <div *ngIf="error" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading">Loading work...</div>
+    <div *ngIf="!!perfint">
+      <h2>Integration: {{ perfint.plugin.title }}; for {{ perfint.performance.title }}</h2>
+      <p>Plugin: {{ perfint.plugin.title }} ({{ perfint.plugin.code}})</p>
+      <p>Plugin enabled: {{ perfint.enabled }}</p>
+      <p>Performance: {{perfint.performance.title}}</p>
+      <p *ngIf="perfint.performance.work">Work: {{ perfint.performance.work.title }} ({{perfint.performance.work.year}})</p>
+      <p>Performer: {{perfint.performance.performer_title}}</p>
+      <p>Venue: {{perfint.performance.venue_title}}</p>
+      <p>Performance Status: {{perfint.performance.status}}</p>
+      <p>GUID: {{ perfint.guid }}</p>
+      <!-- TODO: actions... -->
+    </div>
+  </div>
+</div>
