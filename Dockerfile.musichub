@@ -22,7 +22,7 @@ COPY server server
 RUN cd server; npm run build
 
 # TODO: use secrets
-ENV HUBADMIN_PASSWORD ''
+ENV HUBDB_PASSWORD ''
 
 # ng serve
 EXPOSE 4200

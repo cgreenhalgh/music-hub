@@ -26,7 +26,7 @@ export interface Login {
 @Injectable()
 export class ApiService {
   loginSubject:BehaviorSubject<Login> = new BehaviorSubject<Login>({username:'',password:'',state:LoginState.LoggedOut})
-  apiUrl:string = 'http://localhost:8000/api/1'
+  apiUrl:string = 'api/1'
 
   constructor(private http: HttpClient) { }
 

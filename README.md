@@ -22,8 +22,9 @@ docker network create --driver bridge internal
 
 ```
 LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32} > hubdb.password
+LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32} > musichub.password
 LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32} > hubadmin.password
-sed -e "s/HUBDB_PASSWORD/`cat hubdb.password`/;s/HUBADMIN_PASSWORD/`cat hubadmin.password`/" createdb.sql.template > createdb.sql
+sed -e "s/MUSICHUB_PASSWORD/`cat musichub.password`/;s/HUBADMIN_PASSWORD/`cat hubadmin.password`/" createdb.sql.template > createdb.sql
 ```
 Written in typescript for Node.js
 Dockerised.
