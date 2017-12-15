@@ -4,11 +4,17 @@ import { Account, RoleAssignment, Role, Work, Performance, Plugin, PluginSetting
 import { Capability, hasCapability } from './access'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 
+let password = process.env['HUBADMIN_PASSWORD']
+if (!password || password.length==0) {
+  console.log(`ERROR: HUBADMIN_PASSWORD not defined`)
+  password = "d2R4dWPtPN4zDIOsUvUyN67Tx98Wo5pu"
+}
+
 let pool = mysql.createPool({
   connectionLimit : 10,
   host: "hubdb",
   user: "musichub",
-  password: "d2R4dWPtPN4zDIOsUvUyN67Tx98Wo5pu",//
+  password: password,
   database: 'musichub'
 })
 

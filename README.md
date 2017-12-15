@@ -23,6 +23,7 @@ docker network create --driver bridge internal
 ```
 LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32} > hubdb.password
 LC_CTYPE=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32} > hubadmin.password
+sed -e "s/HUBDB_PASSWORD/`cat hubdb.password`/;s/HUBADMIN_PASSWORD/`cat hubadmin.password`/" createdb.sql.template > createdb.sql
 ```
 Written in typescript for Node.js
 Dockerised.
@@ -30,6 +31,11 @@ Dockerised.
 Persistence: [mysql](https://hub.docker.com/_/mysql/)
 ```
 docker run --name hubdb -e MYSQL_ROOT_PASSWORD=`cat hubdb.password` --network=internal -d --restart=always mysql:5.7
+```
+
+init db?!
+```
+cat createdb.sql | docker run -i --rm --network=internal mysql:5.7 sh -c "exec mysql -hhubdb -P3306 -uroot -p`cat hubdb.password`"
 ```
 
 DB debug access:
@@ -45,7 +51,7 @@ docker build -t music-hub .
 
 Dev.
 ```
-docker run -it -p 4200:4200 -p 9876:9876 -p 8000:8000 --network=internal music-hub /bin/bash
+docker run -it -p 4200:4200 -p 9876:9876 -p 8000:8000 --network=internal -e HUBADMIN_PASSWORD=`cat hubadmin.password` music-hub /bin/bash
 ```
 in there
 ```
@@ -76,6 +82,7 @@ curl -X POST -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhos
 
 MVP - see [designnotes API design](docs/designnotes.md#API%20design):
 
+- fix API path from client according to base URL
 - server update integration climb app (5)
 - server clear integration
 - client clear integration 

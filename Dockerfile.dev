@@ -21,6 +21,9 @@ RUN cd hub-app; `npm bin`/ng build -bh /
 COPY server server
 RUN cd server; npm run build
 
+# TODO: use secrets
+ENV HUBADMIN_PASSWORD ''
+
 # ng serve
 EXPOSE 4200
 # karma testing
@@ -28,3 +31,5 @@ EXPOSE 9876
 
 # music-hub API server
 EXPOSE 8000
+
+CMD ["node","server/dist/index.js"]

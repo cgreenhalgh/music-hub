@@ -29,7 +29,18 @@ Each performance may:
 - have performance-specific downloads (e.g. performance-specific configuration files)
 - have associated audio, video and/or log file recordings
 
-### Climb! integrations
+### Priority
+
+- app management per performance
+- archive configuration per performance
+- performance audio/video file upload -> archive
+- performance-specific MPM download
+- account management
+- performer downloads
+- performance create/edit UI
+- work create/edit UI
+
+## Climb! integrations
 
 Specifically for Climb!...
 
@@ -56,16 +67,21 @@ There should be an outgoing link to the archive. This will:
 - link the uploaded/processed log information into the archive
 - export and link uploaded audio/video recordings into the archive
 
-### Priority
+### Climb app integration
 
-- app management per performance
-- archive configuration per performance
-- performance audio/video file upload -> archive
-- performance-specific MPM download
-- account management
-- performer downloads
-- performance create/edit UI
-- work create/edit UI
+Needs to generate per-performance climb app configuration file, named for performance guid. 
+This includes/requires:
+- performance title, performer, location
+- performance GUID
+- performer bios
+- past performances - metadata AND app event logs
+- stage information - title, map information
+- narrative segments
+- linked performance (handling differently for first and second)
+
+In the short term the past performance information can be taken from a fixed file.
+
+The plugin will need to be able to write files to the app's `data/` folder, and read the past performances file.
 
 ## Data and Access Model
 
@@ -127,7 +143,7 @@ Each work has:
 
 Each performance has:
 - work
-- standard descriptive/prospective metadata: title, description (html), performer (name, bio, links), venue (title, links), event? (title, links), date/time (planned)
+- standard descriptive/prospective metadata: title, description (html), performer (name, bio, links), venue (title, links), location (e.g. city; used in app), event? (title, links), date/time (planned)
 - visibility (public, private)
 - status (proposed, confirmed, onnow, completed, cancelled)
 - linked performance(s), e.g. two performances of Climb! within a single concert to be shown in the same app.

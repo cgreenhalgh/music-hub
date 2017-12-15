@@ -3,7 +3,7 @@ CREATE DATABASE musichub
   DEFAULT COLLATE utf8_general_ci;
 
 -- musichub webserver mysql account (with limited access, e.g. can't change schema)
-CREATE USER musichub IDENTIFIED WITH mysql_native_password BY 'd2R4dWPtPN4zDIOsUvUyN67Tx98Wo5pu';
+CREATE USER musichub IDENTIFIED WITH mysql_native_password BY 'HUBDB_PASSWORD';
 GRANT DELETE,INSERT,EXECUTE,SELECT,UPDATE ON musichub.* TO 'musichub';
 
 USE musichub;
@@ -20,7 +20,7 @@ CREATE TABLE musichub.account (
 
 -- default musichub user account 
 INSERT INTO musichub.account (id, email, passwordhash, nickname, description)
-  VALUES ( 1, 'root@musichub', 'Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas', 'Hub admin', 'default hub admin account' );
+  VALUES ( 1, 'root@musichub', 'HUBADMIN_PASSWORD', 'Hub admin', 'default hub admin account' );
 
 -- works
 CREATE TABLE musichub.work (
@@ -48,6 +48,7 @@ CREATE TABLE musichub.performance (
 	performer_title VARCHAR(200) NOT NULL,
 	performer_bio TEXT,
 	venue_title VARCHAR(200) NOT NULL,
+	location VARCHAR(200) NOT NULL,
 	date DATE,
 	time TIME,
 	timezone VARCHAR(20),
@@ -64,11 +65,11 @@ CREATE TABLE musichub.performance (
 -- TODO log files
 
 -- Climb! all your bass performance 1
-INSERT INTO musichub.performance (id, workid, title, performer_title, venue_title, date, time, timezone, public, status )
-  VALUES (1, 1, 'Climb! at All Your Bass', 'Anne Veinberg', 'Nottingham Royal Concert Hall', '2018-01-19', '18:30:00', '+0:00', 0, 'CONFIRMED');
+INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
+  VALUES (1, 1, 'Climb! at All Your Bass', 'Anne Veinberg', 'Anne Veinberg ...', 'Royal Concert Hall', 'Nottingham ','2018-01-19', '18:30:00', '+0:00', 0, 'CONFIRMED');
 
-INSERT INTO musichub.performance (id, workid, title, performer_title, venue_title, date, time, timezone, public, status, linked_performanceid )
-  VALUES (2, 1, 'Climb! at All Your Bass (2)', 'Zubin Kanga', 'Nottingham Royal Concert Hall', '2018-01-19', '19:00:00', '+0:00', 0, 'CONFIRMED', 1);
+INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status, linked_performanceid )
+  VALUES (2, 1, 'Climb! at All Your Bass (2)', 'Zubin Kanga', 'Zubin Kanga ...', 'Royal Concert Hall', 'Nottingham', '2018-01-19', '19:00:00', '+0:00', 0, 'CONFIRMED', 1);
 
 -- role assignments
 CREATE TABLE musichub.role (
