@@ -80,6 +80,7 @@ curl -X POST -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhos
 curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/1/app-config
 curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/1/get-url
 curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/2/get-url
+curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/1/get-mpm-config
 ```
 
 
@@ -87,8 +88,4 @@ curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/
 
 MVP - see [designnotes API design](docs/designnotes.md#API%20design):
 
-- server update integration climb app (9)
-- server integration-specific download
-- client integration-specific download
-- server climbapp MPM file download (10)
-
+- client integration action file download (10)
