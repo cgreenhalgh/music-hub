@@ -5,6 +5,9 @@
     <div *ngIf="!!perfint">
       <h2>Integration: {{ perfint.plugin.title }}; for {{ perfint.performance.title }}</h2>
       <p>Plugin: {{ perfint.plugin.title }} ({{ perfint.plugin.code}})</p>
+      <ul *ngIf="perfint.plugin.settings">
+        <li *ngFor="let setting of perfint.plugin.settings">{{setting.name}}: {{setting.value}}</li>
+      </ul>
       <p>Plugin enabled: {{ perfint.enabled }}</p>
       <p>Performance: {{perfint.performance.title}}</p>
       <p *ngIf="perfint.performance.work">Work: {{ perfint.performance.work.title }} ({{perfint.performance.work.year}})</p>
