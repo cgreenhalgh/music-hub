@@ -76,6 +76,7 @@ curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/a
 curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integrations
 curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integration/1
 curl -X POST -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integration/1/redis-list
+curl -X POST -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integration/1/redis-clear
 ```
 
 
@@ -83,8 +84,6 @@ curl -X POST -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhos
 
 MVP - see [designnotes API design](docs/designnotes.md#API%20design):
 
-- server view climb redis state (7)
-- server clear integration climb app (8)
 - server update integration climb app (9)
 - server integration-specific download
 - client integration-specific download

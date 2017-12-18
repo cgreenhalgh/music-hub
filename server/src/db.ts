@@ -348,7 +348,7 @@ export function getPerformanceIntegrations(account:Account, performanceid:number
   })
 }
 // no perm check here - low-level
-function getPlugin(pluginid:number): Promise<Plugin> {
+function getRawPlugin(pluginid:number): Promise<Plugin> {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, con) => {
       if (err) {
@@ -388,12 +388,37 @@ function getPlugin(pluginid:number): Promise<Plugin> {
     })
   })
 }
+// no perm check here - low-level
+function getRawPluginSetting(pluginid:number, name:string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      con.query('SELECT `value` FROM `plugin_setting` WHERE `pluginid` = ? AND `name` = ?', [pluginid, name], (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing getPluginSetting select: ${err.message}`)
+          reject(err)
+          return
+        }
+        con.release()
+        if (results.length==0)
+          resolve(null)
+        resolve(results.value)
+      })
+    })
+  })
+}
 
 export function getPerformanceIntegration(account:Account, performanceid:number, pluginid:number) : Promise<PerformanceIntegration> {
   return new Promise((resolve, reject) => {
     getPerformance(account, performanceid)
     .then((performance) => {
-      return getPlugin(pluginid)
+      return getRawPlugin(pluginid)
       .then((plugin) => {
         // any extra permission check beyond view performance??
         pool.getConnection((err, con) => {
@@ -437,5 +462,34 @@ export function getPerformanceIntegration(account:Account, performanceid:number,
       })
     })
     .catch((err) => reject(err))
+  })
+}
+// low-level - internal - no security
+export function getRawPerformanceIntegration(perfintid:number) : Promise<PerformanceIntegration> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `performance_integration` WHERE `id` = ?'
+      let params = [perfintid]
+      con.query(query, params, (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing getRawPerformanceIntegration select: ${err.message}`)
+          reject(err)
+          return
+        }
+        con.release()
+        if (results.length==0) {
+          resolve(null)
+        }
+        let perfint:PerformanceIntegration = mapPerformanceIntegration(results[0])
+        resolve(perfint)
+      })
+    })
   })
 }

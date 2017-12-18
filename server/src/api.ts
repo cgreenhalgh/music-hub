@@ -262,9 +262,14 @@ router.post('/performance/:performanceid/integration/:pluginid/:actionid', (req,
         res.send(`Implementation for plugin ${perfint.plugin.code} not found`)
         return
       }
-      let result = plugin.doAction(actionid)
-      res.setHeader('Content-type', 'application/json')
-      res.send(JSON.stringify(result))
+      plugin.doAction(actionid)
+      .then((result) => {
+        res.setHeader('Content-type', 'application/json')
+        res.send(JSON.stringify(result))
+      })
+      .catch((err) => {
+        sendError(res, err)
+      })
     })
   })
   .catch((err) => {

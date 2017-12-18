@@ -143,5 +143,5 @@ CREATE TABLE musichub.performance_integration (
 );
 
 -- Climb! performances app integration(s)
-INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled) VALUES (1, 1, 1);
-INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled) VALUES (2, 1, 1);
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (1, 1, 1, '20180119-allyourbass1');
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (2, 1, 1, '20180119-allyourbass2');

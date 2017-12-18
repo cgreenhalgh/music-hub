@@ -7,12 +7,14 @@ export class PluginProvider {
   enable():void {}
   disable():void {}
   getActions():PluginAction[] { return this.actions; }
-  doAction(action:string):PluginActionResponse {
-    let resp:PluginActionResponse = { 
-      message:"No implemented",
-      error:new Error('Action not implemented')
-    }
-    return resp
+  doAction(action:string):Promise<PluginActionResponse> {
+    return new Promise((resolve, reject) => {
+      let resp:PluginActionResponse = { 
+        message:"No implemented",
+        error:new Error('Action not implemented')
+      }
+      resolve(resp)
+    })
   }
 }
 
