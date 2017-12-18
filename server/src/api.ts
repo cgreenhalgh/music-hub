@@ -1,94 +1,20 @@
 import * as express from 'express'
+import * as fs from 'fs'
 
+import { Work, Download } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, getPerformanceIntegration } from './db'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 import { Capability, hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
+import { unauthorized, badrequest, sendError, getDownloadsDirForWork, crossDomainOptions, basicAuthentication } from './utils'
 
 const router = express.Router()
 
-function unauthorized(res) {
-  res.set('WWW-Authenticate', 'Basic realm=Authorization Required')
-  return res.sendStatus(401)
-}
-
-function badrequest(res, message:string) {
-  console.log(`bad request: ${message}`)
-  res.set('WWW-Authenticate', 'Basic realm=Authorization Required')
-  return res.sendStatus(400)
-}
-
-function sendError(res, err:Error) {
-  if (err instanceof AuthenticationError)
-    unauthorized(res)
-  else if (err instanceof PermissionError) {
-    // forbidden
-    res.status(403)
-    res.send(err.message)
-  } else if (err instanceof NotFoundError) {
-    // not found
-    res.status(404)
-    res.send(err.message)
-  }
-  else {
-    console.log(`Internal error: ${err.message}`, err)
-    res.status(500)
-    res.send(err.message)
-  }
-}
 
 // allow cross-domain for testing
-router.use((req, res, next) => {
-  //console.log('add Access-Control-Allow-Origin')
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-  //intercepts OPTIONS method
-  if ('OPTIONS' === req.method) {
-    //respond with 200
-    res.set('WWW-Authenticate', 'Basic realm=Authorization Required')
-    res.sendStatus(200);
-  } else {
-    next()
-  }
-})
+router.use(crossDomainOptions)
 
-router.use((req, res, next) => {
-  let authorization = req.headers.authorization
-  if (req.user) return next()
-  if (!authorization) return unauthorized(res)
-  // parse
-  let parts = authorization.split(' ')
-  if (parts.length !== 2) return badrequest(res, 'Authorization header badly formatter')
-  let scheme = parts[0]
-    , credentials = new Buffer(parts[1], 'base64').toString()
-    , index = credentials.indexOf(':')
-
-  if ('Basic' != scheme || index < 0) return badrequest(res, 'Authorization header not basic or missing :')
-
-  let name = credentials.slice(0, index)
-    , pass = credentials.slice(index + 1)
-
-  if (!name || !pass) {
-    return unauthorized(res)
-  }
-  
-  authenticate(name, pass)
-  .then((account) => {
-    req.user = account
-    return next()
-  })
-  .catch((err) => {
-    if (err instanceof AuthenticationError) {
-      console.log(`Authentication error: `+err.message)
-      return unauthorized(res)
-    } else {
-      console.log(`Internal error: `+err.message, err)
-      res.sendStatus(500)
-      return
-    }
-  })
-})
+router.use(basicAuthentication)
 
 // GET account
 router.get('/account', (req, res) => {
@@ -150,6 +76,44 @@ router.get('/work/:workid/performances', (req, res) => {
     .catch((err) => {
       sendError(res, err)
     })
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+
+// GET downloads
+router.get('/work/:workid/downloads', (req, res) => {
+  var workid
+  try { workid = Number(req.params.workid) }
+  catch (err) {
+    console.log(`get /work/${req.params.workid}/downloads - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  getWork(req.user, workid)
+  .then((work) => {
+    hasCapability(req.user, Capability.DownloadWork, work)
+    .then((access) => {
+      if (!access) {
+        sendError(res, new PermissionError('user does not have download-work capability'))
+        return
+      } 
+    })
+   // TODO return downloads
+   let downloadsDir = getDownloadsDirForWork(work)
+   fs.readdir(downloadsDir, (err,files) => {
+     if (err) {
+       sendError(res, err)
+       return
+     }
+     let downloads:Download[] = []
+     for (let file of files) {
+       downloads.push({ filename: file })
+     }
+     res.setHeader('Content-type', 'application/json')
+     res.send(JSON.stringify(downloads))
+   })
   })
   .catch((err) => {
     sendError(res, err)
@@ -275,11 +239,6 @@ router.post('/performance/:performanceid/integration/:pluginid/:actionid', (req,
   .catch((err) => {
     sendError(res, err)
   })
-})
-
-/* GET api listing. */
-router.get('/', (req, res) => {
-  res.send('api works');
 })
 
 router.all('*', (req, res) => {

@@ -93,8 +93,8 @@ Multiple _roles_ in relation to a work/performance:
 - `admin` - site admin, can create and manage accounts
 - `publisher` - can create new works on the site
 - `owner` - control of work
-- `performancemanager` - control of a performance
 - `performer` - can access supporting resources, e.g. for rehearsal
+- `performancemanager` - control of a performance
 - `public` - anyone (default role)
 
 System capabilities:
@@ -109,6 +109,7 @@ Capabilities in relation to a work:
 - `create-work`
 - `edit-work`
 - `view-work`
+- `download-work`
 - `edit-roles-work`
 - `create-work-performance`
 
@@ -116,7 +117,6 @@ Capabilities in relation to a performance:
 - `edit-performance`
 - `view-performance`
 - `edit-roles-performance`
-- `download-performance`
 - `create-recording`
 - `manage-performance-integration`
 
@@ -208,6 +208,10 @@ Initially basic authentication. (order of priority)
 `PUT /api/1/performance/<PERFORMANCE>` -> edit performance info
 
 `POST /api/1/work/<WORK>/performances` -> add new performance
+
+`GET /api/1/work/<WORK>/downloads` -> array of downloads
+
+`GET /downloads/<WORK>/<FILENAME>` -> download
 
 (3) `GET /api/1/performance/<PERFORMANCE>/integrations` -> array of integrations (incl. disabled/possible?!)
 

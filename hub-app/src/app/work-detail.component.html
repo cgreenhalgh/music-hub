@@ -13,5 +13,13 @@
         <a [routerLink]="['/performance',performance.id]" >{{performance.title}}</a>
       </li>
     </ul>
+    <h3>Downloads</h3>
+    <div *ngIf="error3" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading3">Loading downloads...</div>
+    <ul>
+      <li *ngFor="let download of downloads">
+        <a href="downloads/{{work.id}}/{{download.filename}}" target="_blank" download>{{download.filename}}</a>
+      </li>
+    </ul>
   </div>
 </div>

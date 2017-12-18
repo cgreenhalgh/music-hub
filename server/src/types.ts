@@ -16,6 +16,10 @@ export interface Work {
   description?:string
 }
 
+export interface Download {
+  filename:string
+}
+
 export interface Performance {
   id:number
   workid:number

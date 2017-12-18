@@ -8,6 +8,7 @@ import * as bodyParser from 'body-parser'
 
 // Get our API routes
 import * as api from './api'
+import * as downloads from './downloads'
 
 // bootstrap plugins
 import { PluginProvider, registerPlugin } from './plugins'
@@ -27,6 +28,7 @@ app.use(express.static(path.join(__dirname, '..', '..', 'hub-app', 'dist')));
 
 // Set our api routes
 app.use('/api/1', api);
+app.use('/downloads', downloads);
 
 // Catch all other routes and return the index file
 app.get('*', (req, res) => {

@@ -13,13 +13,13 @@ export enum Capability {
   CreateWork = 'create-work',
   EditWork = 'edit-work',
   ViewWork = 'view-work',
+  DownloadWork = 'download-work',
   EditRolesWork = 'edit-roles-work',
   CreateWorkPerformance = 'create-work-performance',
   // Capabilities in relation to a performance:
   EditPerformance = 'edit-performance',
   ViewPerformance = 'view-performance',
   EditRolesPerformance = 'edit-roles-performance',
-  DownloadPerformance = 'download-performance',
   CreateRecording = 'create-recording',
   ManagePerformanceIntegration = 'manage-performance-integration',
   // Capabilities in relation to a recording:
@@ -85,7 +85,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
         }
       })
       .catch((err) => { reject(err) })
-    } else if (Capability.EditWork==capability || Capability.EditRolesWork==capability || Capability.CreateWorkPerformance==capability || Capability.EditRolesPerformance==capability) {
+    } else if (Capability.EditWork==capability || Capability.DownloadWork==capability || Capability.EditRolesWork==capability || Capability.CreateWorkPerformance==capability || Capability.EditRolesPerformance==capability) {
       // owner?
       if (!work) {
         //reject(new PermissionError(`Edit work not specified`))
@@ -97,6 +97,9 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
         if (roles.indexOf(Role.Owner)>=0) {
           resolve(true)
           return
+        } else if (Capability.DownloadWork==capability && roles.indexOf(Role.Performer)>=0) {
+          // performer can download
+          resolve(true)
         } else {
           //reject(new PermissionError(`${account.email} does not have Owner rights on ${work.title}`))
           resolve(false)
@@ -105,7 +108,7 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
       })
       .catch((err) => { reject(err) })
     } else if (Capability.ViewWork==capability) {
-      // (owner, performer or) public (all public!)
+      // anyone! (for now, at least all works are public)
       resolve(true)
       return
     } else if (Capability.EditPerformance==capability || Capability.ViewPerformance==capability) {
@@ -132,20 +135,21 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
           resolve(true)
           return
         }
-        return getRoles(account, work.id, performance.id)
-      })
-      .then((roles) => {
-        if (roles.indexOf(Role.PerformanceManager)>=0) {
-          resolve(true)
-          return
-        } else {
-          //reject(new PermissionError(`${account.email} does not have Edit rights on ${work.title} ${performance.title}`))
-          resolve(false)
-          return
-        }
+        getRoles(account, work.id, performance.id)
+        .then((roles) => {
+          if (roles.indexOf(Role.PerformanceManager)>=0) {
+            resolve(true)
+            return
+          } else {
+            //reject(new PermissionError(`${account.email} does not have Edit rights on ${work.title} ${performance.title}`))
+            resolve(false)
+            return
+          }
+        })
+      .catch((err) => { reject(err) })
       })
       .catch((err) => { reject(err) })
-    } else if (Capability.DownloadPerformance==capability || Capability.ManagePerformanceIntegration==capability || Capability.CreateRecording==capability || Capability.EditRecording==capability || Capability.ViewRecording==capability) {
+    } else if (Capability.ManagePerformanceIntegration==capability || Capability.CreateRecording==capability || Capability.EditRecording==capability || Capability.ViewRecording==capability) {
       // performance manager
       if (!performance) {
         //reject(new PermissionError(`performance not specified`))

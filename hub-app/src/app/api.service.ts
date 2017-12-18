@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Account, Work, Performance, PerformanceIntegration, PluginActionResponse } from './types'
+import { Account, Work, Performance, PerformanceIntegration, PluginActionResponse, Download } from './types'
 
 export enum LoginState {
   LoggedOut = 1,
@@ -94,6 +94,9 @@ export class ApiService {
   getPerformancesOfWork(workid:string): Observable<Performance[]> {
     return this.http.get<Performance[]>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/performances', {headers:this.getHeaders()})
   }
+  getDownloadsForWork(workid:string): Observable<Download[]> {
+    return this.http.get<Download[]>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/downloads', {headers:this.getHeaders()})
+  }
   getPerformance(performanceid:string): Observable<Performance> {
     return this.http.get<Performance>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid), {headers:this.getHeaders()})
   }
@@ -103,7 +106,6 @@ export class ApiService {
   getPerformanceIntegration(performanceid:string, pluginid:string): Observable<PerformanceIntegration> {
     return this.http.get<PerformanceIntegration>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid), {headers:this.getHeaders()})
   }
-  // TODO precise return type
   doIntegrationAction(performanceid:string, pluginid:string, actionid:string): Observable<PluginActionResponse> {
     return this.http.post<PluginActionResponse>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid)+'/'+encodeURIComponent(actionid), null, {headers:this.getHeaders()})
   }
