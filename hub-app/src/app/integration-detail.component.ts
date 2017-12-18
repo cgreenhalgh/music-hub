@@ -56,7 +56,7 @@ export class IntegrationDetailComponent implements OnInit {
   doAction(action:PluginAction): void {
     console.log(`doAction ${action.id} on performance ${this.perfint.performanceid} plugin ${this.perfint.pluginid}`)
     let actionres:ActionRecord = { text: `request ${action.title}...` }
-    this.actions.push(actionres)
+    this.actions.splice(0, 0, actionres)
     this.api.doIntegrationAction(String(this.perfint.performanceid), String(this.perfint.pluginid), action.id).
     subscribe((res) => {
         if (res.error) {

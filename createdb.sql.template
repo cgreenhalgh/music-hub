@@ -130,11 +130,13 @@ INSERT INTO musichub.plugin (id, title, code)
   VALUES(1, 'Climb! app on music-mrl', 'climbapp');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'appurl', 'http://music-mrl.nott.ac.uk/2/muzivisual/');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'logprocapiurl', 'http://uploader:{{env.LOGPROC_PASSWORD}}@music-mrl.nott.ac.uk/1/logproc/api');
+INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'redishost', 'music-mrl.nott.ac.uk');
 
 INSERT INTO musichub.plugin (id, title, code) 
   VALUES(2, 'Climb! app on localhost', 'climbapp');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (2, 'appurl', 'http://localhost:8080/2/muzivisual/');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (2, 'logprocapiurl', 'http://uploader:{{env.LOGPROC_PASSWORD}}@localhost:8080/1/logproc/api');
+INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (2, 'redishost', 'localhost');
 
 
 

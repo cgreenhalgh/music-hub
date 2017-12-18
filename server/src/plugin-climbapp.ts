@@ -12,8 +12,10 @@ const REDIS_CLEAR = "redis-clear"
 const APP_CONFIG = "app-config"
 const GET_URL = "get-url"
 const GET_MPM_CONFIG = "get-mpm-config"
+const GET_MUZICODES_SETTINGS = "get-muzicodes-settings"
 const APPURL_SETTING = 'appurl'
 const LOGPROCAPIURL_SETTING = 'logprocapiurl'
+const REDISHOST_SETTING = 'redishost'
 
 const actions:PluginAction [] = [
   {
@@ -44,6 +46,12 @@ const actions:PluginAction [] = [
     "id":GET_MPM_CONFIG,
     "title":"Get MPM file",
     "description":"Get music-performance-manager config file",
+    "confirm":false
+  },
+  {
+    "id":GET_MUZICODES_SETTINGS,
+    "title":"Get Muzicodes settings",
+    "description":"Get muzicodes app link (global) settings",
     "confirm":false
   }
 ]
@@ -106,6 +114,8 @@ export class ClimbappPlugin extends PluginProvider {
         this.getUrl(resolve, reject)
       else if (GET_MPM_CONFIG==action)
         this.getMpmConfig(resolve, reject)
+      else if (GET_MUZICODES_SETTINGS==action)
+        this.getMuzicodesSettings(resolve, reject)
       else
         resolve({message:'Unknown action on climbapp', error: new Error('Unknown action')})
     })
@@ -301,5 +311,17 @@ export class ClimbappPlugin extends PluginProvider {
       ix = eix+2
     }
     return res
+  }
+  getMuzicodesSettings(resolve, reject):void {
+    console.log(`get muzicodes settings climbapp ${this.perfint.id} for performance ${this.perfint.performanceid}`)
+    getRawPluginSetting(this.perfint.pluginid, REDISHOST_SETTING)
+    .then((redishost) => {
+      if (!redishost) {
+        resolve({message:'redishost not set on climbapp plugin', error: new Error('GUID not set')})
+        return
+      }
+      resolve({message:`Use redis: yes; Redis host: ${redishost}; Redis port: 6379; Redis password: ${process.env.REDIS_PASSWORD}`})
+    })
+    .catch((err) => reject(err))
   }
 }

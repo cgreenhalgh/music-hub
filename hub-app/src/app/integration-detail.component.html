@@ -16,9 +16,6 @@
       <p>Performance Status: {{perfint.performance.status}}</p>
       <p>GUID: {{ perfint.guid }}</p>
       <h3>Actions</h3>
-      <ul>
-        <div *ngFor="let action of actions" class="alert" [ngClass]="{'alert-danger':action.error,'alert-success':action.success,'alert-info':(!action.success && !action.error)}">{{action.text}}</div>
-      </ul>
       <div *ngIf="perfint.plugin.actions">
         <!-- TODO disable depending on role? enabled? -->
         <ng-template ngFor let-action [ngForOf]="perfint.plugin.actions">
@@ -40,6 +37,9 @@
           <button class="button" (click)="action.confirm ? openActionConfirm(confirmdialog): doAction(action)" [disabled]="!perfint.enabled">{{action.title}}</button>
         </ng-template>
       </div>
+      <ul>
+        <div *ngFor="let action of actions" class="alert" [ngClass]="{'alert-danger':action.error,'alert-success':action.success,'alert-info':(!action.success && !action.error)}">{{action.text}}</div>
+      </ul>
     </div>
   </div>
 </div>
