@@ -26,6 +26,8 @@ ENV MUSICHUB_PASSWORD ''
 ENV REDIS_PASSWORKD ''
 ENV LOGPROC_PASSWORD ''
 
+VOLUME /root/work/mounts/climbapp/muzivisual2
+
 # ng serve
 EXPOSE 4200
 # karma testing

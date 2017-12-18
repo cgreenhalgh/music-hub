@@ -279,6 +279,39 @@ export function getPerformance(account:Account, performanceid:number) : Promise<
   })
 }
 
+// low-level - no security
+export function getRawPerformance(performanceid:number) : Promise<Performance> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `performance` WHERE `id` = ?'
+      let params = [performanceid]
+      con.query(query, params, (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing getPerformance select: ${err.message}`)
+          reject(err)
+          return
+        }
+        con.release()
+        if (results.length==0) {
+          reject(new NotFoundError(`performance ${performanceid} not found`))
+          return
+        }
+        let perf:Performance = mapPerformance(results[0])
+        // work?
+        resolve(perf)
+      })
+    })
+    
+  })
+}
+
 function mapPerformanceIntegration(result:any) : PerformanceIntegration {
   if (!result)
     return null
@@ -389,7 +422,7 @@ function getRawPlugin(pluginid:number): Promise<Plugin> {
   })
 }
 // no perm check here - low-level
-function getRawPluginSetting(pluginid:number, name:string): Promise<string> {
+export function getRawPluginSetting(pluginid:number, name:string): Promise<string> {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, con) => {
       if (err) {
@@ -408,7 +441,7 @@ function getRawPluginSetting(pluginid:number, name:string): Promise<string> {
         con.release()
         if (results.length==0)
           resolve(null)
-        resolve(results.value)
+        resolve(results[0].value)
       })
     })
   })

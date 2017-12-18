@@ -128,7 +128,13 @@ CREATE TABLE musichub.plugin_setting (
 -- Climb! app
 INSERT INTO musichub.plugin (id, title, code) 
   VALUES(1, 'Climb! app on music-mrl', 'climbapp');
-INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'test', '123');
+INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'appurl', 'http://music-mrl.nott.ac.uk/2/muzivisual/');
+
+INSERT INTO musichub.plugin (id, title, code) 
+  VALUES(2, 'Climb! app on localhost', 'climbapp');
+INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (2, 'appurl', 'http://localhost:8080/2/muzivisual/');
+
+
 
 -- performance-specific integration
 CREATE TABLE musichub.performance_integration (
@@ -145,3 +151,23 @@ CREATE TABLE musichub.performance_integration (
 -- Climb! performances app integration(s)
 INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (1, 1, 1, '20180119-allyourbass1');
 INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (2, 1, 1, '20180119-allyourbass2');
+
+
+-- FAST All Hands Demo
+INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
+  VALUES (3, 1, 'Climb! at FAST AHM 2018 (1)', 'No-one in particular', 'Something interesting to read...', 'The Oval', 'London','2017-12-20', '13:00:00', '+0:00', 0, 'CONFIRMED');
+INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
+  VALUES (4, 1, 'Climb! at FAST AHM 2018 (2)', 'No-one in particular', 'Something interesting to read...', 'The Oval', 'London','2017-12-20', '13:30:00', '+0:00', 0, 'CONFIRMED');
+
+INSERT INTO musichub.account (id, email, passwordhash, nickname, description)
+  VALUES ( 2, 'adrian', 'HUBADMIN_PASSWORD', 'Adrian', 'Adrians account' );
+
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (3, 1, 1, '20171220-climb-fastahm1');
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (4, 1, 1, '20180119-climb-fastahm2');
+
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (3, 2, 1, '20171220-climb-fastahm1');
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (4, 2, 1, '20180119-climb-fastahm2');
+
+INSERT INTO musichub.role (accountid, role, workid) VALUES (2, 'owner', 1);
+INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 3);
+INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 4);

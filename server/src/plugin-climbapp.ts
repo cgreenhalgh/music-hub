@@ -1,13 +1,17 @@
 // climbapp plugin
 import * as redis from 'redis'
+import * as fs from 'fs'
 
-import { PluginProvider, registerPlugin } from './plugins'
+import { PluginProvider, registerPlugin, getPluginDir, getMountDir } from './plugins'
 import { PerformanceIntegration, PluginAction, PluginActionResponse } from './types'
-import { getRawPerformanceIntegration } from './db'
+import { getRawPerformanceIntegration, getRawPerformance, getRawPluginSetting } from './db'
 
+const PLUGIN_CODE = 'climbapp'
 const REDIS_LIST = "redis-list"
 const REDIS_CLEAR = "redis-clear"
 const APP_CONFIG = "app-config"
+const GET_URL = "get-url"
+const APPURL_SETTING = 'appurl'
 
 const actions:PluginAction [] = [
   {
@@ -27,9 +31,29 @@ const actions:PluginAction [] = [
     "title":"Configure",
     "description":"Generate/update app configuration",
     "confirm":true
+  },
+  {
+    "id":GET_URL,
+    "title":"Get URL",
+    "description":"Get external app URL",
+    "confirm":false
   }
 ]
 
+interface MuzivisualPerformance {
+  title:string
+  location:string
+  performer:string
+  guid:string
+}
+interface MuzivisualConfig {
+  // TODO refine types?!
+  pastPerformances?:any[]
+  map?:any[]
+  narrative?:any[]
+  performances?:MuzivisualPerformance[]
+  performers?:string[]
+}
 
 export class ClimbappPlugin extends PluginProvider {
   private redisClient
@@ -54,7 +78,7 @@ export class ClimbappPlugin extends PluginProvider {
     }); 
   }
   getCode(): string {
-    return 'climbapp'
+    return PLUGIN_CODE
   }
   enable(): void {
     // TODO
@@ -70,6 +94,8 @@ export class ClimbappPlugin extends PluginProvider {
         this.redisClear(resolve, reject)
       else if (APP_CONFIG==action)
         this.appConfig(resolve, reject)
+      else if (GET_URL==action)
+        this.getUrl(resolve, reject)
       else
         resolve({message:'Unknown action on climbapp', error: new Error('Unknown action')})
     })
@@ -116,11 +142,79 @@ export class ClimbappPlugin extends PluginProvider {
   }
   appConfig(resolve, reject):void {
     console.log(`configure climbapp ${this.perfint.id} for performance ${this.perfint.performanceid}`)
-    // TODO
-    let resp:PluginActionResponse = { 
-      message:"whir whir..."
-    }
-    resolve(resp)
+    getRawPerformanceIntegration(this.perfint.id)
+    .then((perfint) => {
+      if (!perfint.guid) {
+        resolve({message:'GUID not set on climbapp integration', error: new Error('GUID not set')})
+        return
+      }
+      getRawPerformance(this.perfint.performanceid)
+      .then((perf) => {
+        // TODO linked performance
+        let mperf : MuzivisualPerformance = {
+          title: perf.title,
+          location: perf.location,
+          performer: perf.performer_title,
+          guid:perfint.guid
+        }
+        let templatefile = getPluginDir(PLUGIN_CODE) + '/muzivisual-config.json'
+        fs.readFile(templatefile, 'utf8', (err, data) => {
+          if(err) {
+            resolve({message:`Error reading template file ${templatefile}`, error: err})
+            return
+          }
+          var mconfig:MuzivisualConfig = null
+          try {
+            mconfig = JSON.parse(data) as MuzivisualConfig
+          }
+          catch(err) {
+            resolve({message:`Error parsing template file ${templatefile}`, error: err})
+            return
+          }
+          if (!mconfig.performances)
+            mconfig.performances = []
+          mconfig.performances.push(mperf)
+          if (!mconfig.performers) 
+            mconfig.performers = []
+          mconfig.performers.push(perf.performer_bio)
+          // write output
+          let outputfile = getMountDir(PLUGIN_CODE, 'muzivisual2')+'/'+perfint.guid+'.json'
+          console.log(`write climbapp config to ${outputfile}`)
+          fs.writeFile(outputfile, JSON.stringify(mconfig), 'utf8', (err) => {
+            if(err) {
+              resolve({message:`Error writing app config file ${outputfile}`, error: err})
+              return
+            }
+            let resp:PluginActionResponse = { 
+              message:`Wrote app config file ${outputfile}`
+            }
+            resolve(resp)
+          })
+        })
+      })
+      .catch((err) => reject(err))
+    })
+    .catch((err) => reject(err))
+  }
+  getUrl(resolve, reject):void {
+    console.log(`get url climbapp ${this.perfint.id} for performance ${this.perfint.performanceid}`)
+    getRawPerformanceIntegration(this.perfint.id)
+    .then((perfint) => {
+      if (!perfint.guid) {
+        resolve({message:'GUID not set on climbapp integration', error: new Error('GUID not set')})
+        return
+      }
+      getRawPluginSetting(this.perfint.pluginid, APPURL_SETTING)
+      .then((appurl) => {
+        if (!appurl) {
+          resolve({message:'Appurl not set on climbapp plugin', error: new Error('GUID not set')})
+          return
+        }
+        let url = appurl+'?p='+encodeURIComponent(perfint.guid)
+        resolve({message:url})
+      })
+      .catch((err) => reject(err))
+    })
+    .catch((err) => reject(err))
   }
 }
-

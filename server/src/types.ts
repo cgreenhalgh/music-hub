@@ -24,6 +24,7 @@ export interface Performance {
   description?:string
   performer_title:string
   performer_bio?:string
+  location:string
   venue_title:string
   date?:string //DATE,
   time?:string //TIME,

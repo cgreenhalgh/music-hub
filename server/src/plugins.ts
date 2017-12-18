@@ -1,5 +1,12 @@
 import { PerformanceIntegration, PluginAction, PluginActionResponse } from './types'
 
+export function getPluginDir(code:string):string {
+  return __dirname+'/../../plugins/'+code
+}
+export function getMountDir(code:string, mount:string):string {
+  return __dirname+'/../../mounts/'+code+'/'+mount
+}
+
 export class PluginProvider {
   // is it ok to hold on to the old value?!
   constructor(protected perfint:PerformanceIntegration, protected actions:PluginAction[]) {}

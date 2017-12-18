@@ -77,6 +77,9 @@ curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/a
 curl -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integration/1
 curl -X POST -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integration/1/redis-list
 curl -X POST -v http://root%40musichub:Eaw_a4lmaxEkRXCoxD3jH0o37HvUCJas@localhost:8000/api/1/performance/1/integration/1/redis-clear
+curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/1/app-config
+curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/1/get-url
+curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/2/get-url
 ```
 
 
