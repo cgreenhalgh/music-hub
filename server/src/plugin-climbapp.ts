@@ -11,7 +11,9 @@ const REDIS_LIST = "redis-list"
 const REDIS_CLEAR = "redis-clear"
 const APP_CONFIG = "app-config"
 const GET_URL = "get-url"
+const GET_MPM_CONFIG = "get-mpm-config"
 const APPURL_SETTING = 'appurl'
+const LOGPROCAPIURL_SETTING = 'logprocapiurl'
 
 const actions:PluginAction [] = [
   {
@@ -36,6 +38,12 @@ const actions:PluginAction [] = [
     "id":GET_URL,
     "title":"Get URL",
     "description":"Get external app URL",
+    "confirm":false
+  },
+  {
+    "id":GET_MPM_CONFIG,
+    "title":"Get MPM file",
+    "description":"Get music-performance-manager config file",
     "confirm":false
   }
 ]
@@ -96,6 +104,8 @@ export class ClimbappPlugin extends PluginProvider {
         this.appConfig(resolve, reject)
       else if (GET_URL==action)
         this.getUrl(resolve, reject)
+      else if (GET_MPM_CONFIG==action)
+        this.getMpmConfig(resolve, reject)
       else
         resolve({message:'Unknown action on climbapp', error: new Error('Unknown action')})
     })
@@ -216,5 +226,80 @@ export class ClimbappPlugin extends PluginProvider {
       .catch((err) => reject(err))
     })
     .catch((err) => reject(err))
+  }
+  getMpmConfig(resolve, reject):void {
+    console.log(`get mpm config climbapp ${this.perfint.id} for performance ${this.perfint.performanceid}`)
+    getRawPerformanceIntegration(this.perfint.id)
+    .then((perfint) => {
+      if (!perfint.guid) {
+        resolve({message:'GUID not set on climbapp integration', error: new Error('GUID not set')})
+        return
+      }
+      getRawPluginSetting(this.perfint.pluginid, LOGPROCAPIURL_SETTING)
+      .then((logprocapiurl) => {
+        if (!logprocapiurl) {
+          resolve({message:'logprocapiurl not set on climbapp plugin', error: new Error('GUID not set')})
+          return
+        }
+        getRawPerformance(this.perfint.performanceid)
+        .then((perf) => {
+          let templatefile = getPluginDir(PLUGIN_CODE) + '/mpm-config.json'
+          fs.readFile(templatefile, 'utf8', (err, data) => {
+            if(err) {
+              resolve({message:`Error reading template file ${templatefile}`, error: err})
+              return
+            }
+            let vars = {
+              performance: perf,
+              guid: perfint.guid,
+              settings: { logprocapiurl: '' },
+              ip: '{{ip}}',
+              env: { LOGPROC_PASSWORD: process.env.LOGPROC_PASSWORD }
+            }
+            // template logprocurl!
+            vars.settings.logprocapiurl = this.template(logprocapiurl, vars)
+            data = this.template(data, vars)
+            resolve({message:`MPM config returned`, download: { filename: 'mpm-'+perfint.guid+'.json', data: data }})
+          })
+        })
+        .catch((err) => reject(err))
+      })
+      .catch((err) => reject(err))
+    })
+    .catch((err) => reject(err))
+  }
+  
+  template(data:string, vars:any): string {
+    let res = ''
+    let ix=0
+    while(ix>=0) {
+      let nix = data.indexOf('{{', ix)
+      if (nix<0) {
+        res = res + data.substring(ix)
+        break
+      }
+      res = res + data.substring(ix, nix)
+      let eix = data.indexOf('}}', nix+2)
+      if (eix<0) {
+        res = res + data.substring(ix)
+        break
+      }
+      let names = data.substring(nix+2, eix).trim().split('.')
+      let val = vars
+      for(let n of names) {
+        if (typeof(val)!='object') {
+          console.log(`found non-object at ${n} in ${names}`)
+          val = ''
+          break
+        }
+        val = val[n]
+      }
+      if (val===null || val===undefined) 
+        val = ''
+      // escape??
+      res = res+ val
+      ix = eix+2
+    }
+    return res
   }
 }

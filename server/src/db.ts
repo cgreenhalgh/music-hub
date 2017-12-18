@@ -431,7 +431,7 @@ export function getRawPluginSetting(pluginid:number, name:string): Promise<strin
         return
       }
       // Use the connection
-      con.query('SELECT `value` FROM `plugin_setting` WHERE `pluginid` = ? AND `name` = ?', [pluginid, name], (err, results, fields) => {
+      con.query('SELECT (`value`) FROM `plugin_setting` WHERE `pluginid` = ? AND `name` = ?', [pluginid, name], (err, results, fields) => {
         if (err) {
           con.release()
           console.log(`Error doing getPluginSetting select: ${err.message}`)
@@ -439,8 +439,11 @@ export function getRawPluginSetting(pluginid:number, name:string): Promise<strin
           return
         }
         con.release()
-        if (results.length==0)
+        //console.log('getRawPluginSetting', results)
+        if (results.length==0) {
           resolve(null)
+          return 
+        }
         resolve(results[0].value)
       })
     })

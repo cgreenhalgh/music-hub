@@ -1,0 +1,215 @@
+{
+	"name":"Test",
+	"expect": [
+		{
+			"id": "musicodes.player",
+			"name": "Musicodes player",
+			"kind": "Report",
+			"level": "error",
+			"maxCardinality": 1,
+			"like": {
+				"@type": "Process",
+				"processType": "BrowserView",
+				"title": "Muzicodes Player"
+			}
+		},
+		{
+			"id": "musicodes.experience",
+			"name": "Musicodes Climb! experience",
+			"kind": "Report",
+			"level": "error",
+			"requires": ["musicodes.player"],
+			"like": {
+				"config": {
+					"experience": {
+						"url": "/experiences/mkGameEngine-out.json",
+						"ok": true
+					}
+				}
+			}
+		},
+		{
+			"id": "musicodes.performanceid",
+			"name": "performance ID",
+			"kind": "TestPoint",
+			"level": "information",
+			"testPoint": "performanceid",
+			"requires": ["musicodes.player"],
+			"show": true
+		},
+		{
+			"id": "musicodes.performanceid.guid",
+			"name": "= {{performance.title}}",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "performanceid",
+			"requires": ["musicodes.player"],
+			"like": "{{guid}}",
+			"button": "{{guid}}"
+		},
+		{
+			"id": "visuals.browserview",
+			"name": "'visuals' browser view",
+			"kind": "Report",
+			"level": "error",
+			"maxCardinality": 1,
+			"like": {
+				"@type": "Process",
+				"processType": "BrowserView",
+				"title": "Browserview - Music Performance Manager",
+				"config": {
+					"name": "visuals"
+				}
+			}
+		},
+		{
+			"id": "visuals.browserview.url",
+			"name": "URL",
+			"kind": "TestPoint",
+			"level": "information",
+			"testPoint": "url",
+			"requires": ["visuals.browserview"],
+			"show": true
+		},
+		{
+			"id": "visuals.browserview.climburl",
+			"name": "= Climb visuals (NB fix IP address!)",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "url",
+			"requires": ["visuals.browserview"],
+			"like": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000",
+			"button": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000"
+		},
+		{
+			"id": "visuals.browserview.climburl",
+			"name": "= Climb visuals (NB fix IP address!) - test",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "url",
+			"requires": ["visuals.browserview"],
+			"like": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000&test",
+			"button": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000&test"
+		},
+		{
+			"id": "meld.browserview",
+			"name": "'meld' browser view",
+			"kind": "Report",
+			"level": "error",
+			"maxCardinality": 1,
+			"like": {
+				"@type": "Process",
+				"processType": "BrowserView",
+				"title": "Browserview - Music Performance Manager",
+				"config": {
+					"name": "meld"
+				}
+			}
+		},
+		{
+			"id": "meld.browserview.url",
+			"name": "URL",
+			"kind": "TestPoint",
+			"level": "information",
+			"testPoint": "url",
+			"requires": ["meld.browserview"],
+			"show": true
+		},
+		{
+			"id": "meld.browserview.climburl",
+			"name": "= start the climb",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "url",
+			"requires": ["meld.browserview"],
+			"like": "http://127.0.0.1:5000/startTheClimb",
+			"button": "http://127.0.0.1:5000/startTheClimb"
+		},
+		{
+			"id": "meld.browserview.climburl.load",
+			"name": "= auto-start start the climb",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "url",
+			"requires": ["meld.browserview"],
+			"like": "http://127.0.0.1:5000/startTheClimb?load",
+			"button": "http://127.0.0.1:5000/startTheClimb?load"
+		},
+		{
+			"id": "meld.browserview.reload",
+			"name": "Reload MELD",
+			"kind": "TestPoint",
+			"level": "information",
+			"testPoint": "reload",
+			"requires": ["meld.browserview"],
+			"button": null
+		},
+		{
+			"id": "logproc.probe",
+			"name": "Public Server",
+			"kind": "Report",
+			"level": "error",
+			"like": {
+				"@type": "Probe",
+				"probeType": "HTTP",
+				"@id": "urn:probe:logproc.probe"
+			}
+		},
+		{
+			"id": "logproc.probe.status",
+			"name": "HTTP Status",
+			"kind": "TestPoint",
+			"level": "information",
+			"testPoint": "status",
+			"requires": ["logproc.probe"],
+			"show": true
+		},
+		{
+			"id": "logproc.probe.ok",
+			"name": "OK",
+			"kind": "TestPoint",
+			"level": "error",
+			"testPoint": "status",
+			"requires": ["logproc.probe"],
+			"like": "200"
+		},
+		{
+			"id": "musicodes.server",
+			"name": "Musicodes server",
+			"kind": "Report",
+			"level": "error",
+			"maxCardinality": 1,
+			"like": {
+				"processType": "Node.js",
+				"@type": "Process",
+				"title": "/vagrant/musiccodes/server/server.js"
+			},
+			"feedback":{
+				"unmatched":"The musicodes server doesn't seem to be running",
+				"maxCardinality":"There seems to be more than one musicodes server running!"
+			}
+		},
+		{
+			"id": "musicodes.server.log",
+			"name": "Musicodes log",
+			"kind": "File",
+			"level": "information",
+			"fileTag": "room:default",
+			"requires": ["musicodes.server"],
+			"post": "{{settings.logprocapiurl}}/1/processlog",
+			"show": true
+		}
+	],
+	"probes": [
+		{
+			"@id": "urn:probe:logproc.probe",
+			"probeType": "HTTP",
+			"title": "Logproc HTTP Probe",
+			"config": {
+				"url": "{{settings.logprocapiurl}}/1/ping",
+				"period": 5,
+				"timeout": 5
+			}
+		}
+	]
+}
