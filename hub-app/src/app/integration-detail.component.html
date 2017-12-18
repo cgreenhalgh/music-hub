@@ -16,11 +16,28 @@
       <ul>
         <div *ngFor="let action of actions" class="alert" [ngClass]="{'alert-danger':action.error,'alert-success':action.success,'alert-info':(!action.success && !action.error)}">{{action.text}}</div>
       </ul>
-      <div>
+      <div *ngIf="perfint.plugin.actions">
         <!-- TODO disable depending on role? enabled? -->
-        <button class="button" (click)="doUpdate()" [disabled]="!perfint.enabled">Update</button>
-        <!-- TODO: other actions... -->
+        <ng-template ngFor let-action [ngForOf]="perfint.plugin.actions">
+			<ng-template #confirmdialog let-c="close" let-d="dismiss">
+			  <div class="modal-header">
+			    <h4 class="modal-title">{{action.title}}?</h4>
+			    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+			      <span aria-hidden="true">&times;</span>
+			    </button>
+			  </div>
+			  <div class="modal-body">
+			    <p>Are you sure you want to {{action.description}}?</p>
+			  </div>
+			  <div class="modal-footer">
+			    <button type="button" class="btn btn-outline-dark" (click)="d('do nothing')">Do nothing</button>
+			    <button type="button" class="btn btn-outline-dark" (click)="c(action)">{{action.title}}</button>
+			  </div>
+			</ng-template>
+          <button class="button" (click)="action.confirm ? openActionConfirm(confirmdialog): doAction(action)" [disabled]="!perfint.enabled">{{action.title}}</button>
+        </ng-template>
       </div>
     </div>
   </div>
 </div>
+

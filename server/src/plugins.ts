@@ -1,12 +1,19 @@
-import { PerformanceIntegration } from './types'
+import { PerformanceIntegration, PluginAction, PluginActionResponse } from './types'
 
 export class PluginProvider {
   // is it ok to hold on to the old value?!
-  constructor(protected perfint:PerformanceIntegration) {}
+  constructor(protected perfint:PerformanceIntegration, protected actions:PluginAction[]) {}
   getCode():string { return null }
   enable():void {}
   disable():void {}
-  update():void {}
+  getActions():PluginAction[] { return this.actions; }
+  doAction(action:string):PluginActionResponse {
+    let resp:PluginActionResponse = { 
+      message:"No implemented",
+      error:new Error('Action not implemented')
+    }
+    return resp
+  }
 }
 
 interface PluginProviderMap {

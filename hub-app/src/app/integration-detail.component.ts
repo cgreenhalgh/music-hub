@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 
-import { Work, Performance, Plugin, PerformanceIntegration } from './types'
+import { Work, Performance, Plugin, PluginAction, PerformanceIntegration } from './types'
 import { ApiService } from './api.service'
 
 import 'rxjs/add/operator/switchMap';
@@ -20,11 +21,13 @@ export class IntegrationDetailComponent implements OnInit {
   perfint:PerformanceIntegration = null
   error:string = null
   loading:boolean = true
-  actions:ActionRecord[] = [ {text:'test'} ]
+  actions:ActionRecord[] = []
+  currentAction:PluginAction = null
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private api:ApiService
+    private api:ApiService,
+    private modalService: NgbModal
   ) {}
     
   ngOnInit(): void {
@@ -41,18 +44,31 @@ export class IntegrationDetailComponent implements OnInit {
         )
       })
   }
-  doUpdate(): void {
-    console.log(`doUpdate on performance ${this.perfint.performanceid} plugin ${this.perfint.pluginid}`)
-    let action:ActionRecord = { text: 'request update...' }
-    this.actions.push(action)
-    this.api.updateIntegration(String(this.perfint.performanceid), String(this.perfint.pluginid)).
+  openActionConfirm(content) {
+    console.log('open', content)
+    this.modalService.open(content).result.then((result) => {
+      this.doAction(result as PluginAction)
+    }, (reason) => {
+    });
+  }
+
+  doAction(action:PluginAction): void {
+    console.log(`doAction ${action.id} on performance ${this.perfint.performanceid} plugin ${this.perfint.pluginid}`)
+    let actionres:ActionRecord = { text: `request ${action.title}...` }
+    this.actions.push(actionres)
+    this.api.doIntegrationAction(String(this.perfint.performanceid), String(this.perfint.pluginid), action.id).
     subscribe((res) => {
-        action.success = true
-        action.text = 'Updated: '+res
+        if (res.error) {
+          actionres.error = true
+          actionres.text = `${action.title} error: ${res.message}: ${res.error.message}`
+        } else {
+          actionres.success = true
+          actionres.text = `${action.title}: ${res.message}`
+        }
       },
       (err) => {
-        action.error = true
-        action.text = 'Error doing update: '+this.api.getMessageForError(err)
+        actionres.error = true
+        actionres.text = `${action.title} error: `+this.api.getMessageForError(err)
       }
     )
   }

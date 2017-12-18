@@ -4,6 +4,7 @@ export interface Account {
   // passwordhash:string
   nickname:string
   description:string
+  roles?:RoleAssignment[]
 }
 
 export interface Work {
@@ -26,7 +27,7 @@ export interface Performance {
   venue_title:string
   date?:string //DATE,
   time?:string //TIME,
-  timezone:string // VARCHAR(20),
+  timezone?:string // VARCHAR(20),
   ispublic:boolean
   status:string
   linked_performanceid:number
@@ -60,11 +61,25 @@ export interface PluginSetting {
   value:string
 }
 
+export interface PluginAction {
+  id:string
+  title:string
+  description:string
+  confirm:boolean
+}
+
+export interface PluginActionResponse {
+  message:string
+  error?:Error
+  data?:any
+}
+
 export interface Plugin {
   id:number
   title:string
   code:string
   settings?:PluginSetting[]
+  actions?:PluginAction[]
 }
 
 export interface PerformanceIntegration {

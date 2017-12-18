@@ -209,6 +209,15 @@ router.get('/performance/:performanceid/integration/:pluginid', (req, res) => {
   //console.log(`get work ${workid}`)
   getPerformanceIntegration(req.user, performanceid, pluginid)
   .then((perfint) => {
+    // actually do something...!
+    let plugin = getPlugin(perfint)
+    if (!plugin) {
+      res.status(500)
+      res.send(`Implementation for plugin ${perfint.plugin.code} not found`)
+      return
+    }
+    let actions = plugin.getActions()
+    perfint.plugin.actions = actions
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(perfint))
   })
@@ -217,17 +226,18 @@ router.get('/performance/:performanceid/integration/:pluginid', (req, res) => {
   })
 })
 // update performance integration
-router.post('/performance/:performanceid/integration/:pluginid/update', (req, res) => {
-  var performanceid, pluginid
+router.post('/performance/:performanceid/integration/:pluginid/:actionid', (req, res) => {
+  var performanceid, pluginid, actionid
   try { 
     performanceid = Number(req.params.performanceid);
     pluginid = Number(req.params.pluginid); 
   }
   catch (err) {
-    console.log(`post /performance/${req.params.performanceid}/integration/${req.params.pluginid} - not a number`)
+    console.log(`post /performance/${req.params.performanceid}/integration/${req.params.pluginid}/... - not a number`)
     res.sendStatus(404)
     return
   }
+  actionid = req.params.actionid
   getPerformanceIntegration(req.user, performanceid, pluginid)
   .then((perfint) => {
     console.log(`update performance ${perfint.performanceid} plugin ${perfint.pluginid} by ${req.user.email}`)
@@ -252,10 +262,9 @@ router.post('/performance/:performanceid/integration/:pluginid/update', (req, re
         res.send(`Implementation for plugin ${perfint.plugin.code} not found`)
         return
       }
-      plugin.update()
-      // TODO request-specific return value?
+      let result = plugin.doAction(actionid)
       res.setHeader('Content-type', 'application/json')
-      res.send(JSON.stringify({message:'working on it...'}))
+      res.send(JSON.stringify(result))
     })
   })
   .catch((err) => {

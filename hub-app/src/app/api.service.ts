@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Account, Work, Performance, PerformanceIntegration } from './types'
+import { Account, Work, Performance, PerformanceIntegration, PluginActionResponse } from './types'
 
 export enum LoginState {
   LoggedOut = 1,
@@ -104,8 +104,8 @@ export class ApiService {
     return this.http.get<PerformanceIntegration>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid), {headers:this.getHeaders()})
   }
   // TODO precise return type
-  updateIntegration(performanceid:string, pluginid:string): Observable<any> {
-    return this.http.post<any>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid)+'/update', null, {headers:this.getHeaders()})
+  doIntegrationAction(performanceid:string, pluginid:string, actionid:string): Observable<PluginActionResponse> {
+    return this.http.post<PluginActionResponse>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid)+'/'+encodeURIComponent(actionid), null, {headers:this.getHeaders()})
   }
   getMessageForError(err):string {
     let error = 'Error making request to server'

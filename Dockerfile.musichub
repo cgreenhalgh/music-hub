@@ -22,7 +22,9 @@ COPY server server
 RUN cd server; npm run build
 
 # TODO: use secrets
-ENV HUBDB_PASSWORD ''
+ENV MUSICHUB_PASSWORD ''
+ENV REDIS_PASSWORKD ''
+ENV LOGPROC_PASSWORD ''
 
 # ng serve
 EXPOSE 4200

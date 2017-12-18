@@ -182,6 +182,16 @@ For performance (Climb!) app integration:
 - GUID (climb-specific?!)
 - (past performances?)
 
+Each plugin has a set of possible actions with:
+- id
+- title, description
+- confirm, i.e. requires explicit confirmation
+
+Each plugin action response has:
+- message - readable
+- error? (if failed)
+- data?
+
 ## API design
 
 Web API. 
@@ -205,8 +215,11 @@ Initially basic authentication. (order of priority)
 
 `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> edit (create?!) integration info
 
-(5) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/update` -> update integration (e.g. export files)
-(6) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/clear` -> clear integration-related state (e.g. Climb! app redis state)
+(5)`PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/<ACTION>` -> perform a plugin action
 
-(7) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/download/<DOWNLOAD>` -> integration-specific download (e.g. MPM file?)
+(6) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/redis-list` -> get Climb! app redis state
+(7) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/redis-clear` -> clear Climb! app redis state
+(8) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/app-config` -> update app config file
+
+(9) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/download/<DOWNLOAD>` -> integration-specific download (e.g. MPM file?)
 

@@ -61,11 +61,25 @@ export interface PluginSetting {
   value:string
 }
 
+export interface PluginAction {
+  id:string
+  title:string
+  description:string
+  confirm:boolean
+}
+
+export interface PluginActionResponse {
+  message:string
+  error?:Error
+  data?:any
+}
+
 export interface Plugin {
   id:number
   title:string
   code:string
   settings?:PluginSetting[]
+  actions?:PluginAction[]
 }
 
 export interface PerformanceIntegration {

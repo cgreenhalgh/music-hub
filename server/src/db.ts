@@ -412,6 +412,7 @@ export function getPerformanceIntegration(account:Account, performanceid:number,
               reject(err)
               return
             }
+            con.release()
             if (results.length==0) {
               // fake / disabled
               let perfint:PerformanceIntegration = {
