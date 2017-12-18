@@ -69,10 +69,17 @@ export interface PluginAction {
   confirm:boolean
 }
 
+export interface PluginDownload {
+  data:any
+  mimeType:string
+  filename:string
+}
+
 export interface PluginActionResponse {
   message:string
   error?:Error
   data?:any
+  download?:PluginDownload
 }
 
 export interface Plugin {

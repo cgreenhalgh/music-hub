@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import * as FileSaver from 'file-saver'
 
 import { Work, Performance, Plugin, PluginAction, PerformanceIntegration } from './types'
 import { ApiService } from './api.service'
@@ -64,6 +65,13 @@ export class IntegrationDetailComponent implements OnInit {
         } else {
           actionres.success = true
           actionres.text = `${action.title}: ${res.message}`
+          if (res.download) {
+            let blob = new Blob([res.download.data], {
+              type: res.download.mimeType
+            });
+            console.log(`save download ${res.download.filename}`)
+            FileSaver.saveAs(blob, res.download.filename);
+          }
         }
       },
       (err) => {

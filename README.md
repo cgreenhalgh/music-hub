@@ -88,4 +88,16 @@ curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/
 
 MVP - see [designnotes API design](docs/designnotes.md#API%20design):
 
-- client integration action file download (10)
+- linked performance app configuration
+- integration-specific settings - server
+- integration-specific settings - show UI
+- archive generate top-level file
+- archive generate performance file
+
+future;
+- archive recording upload UI+server
+- performance edit UI+server
+- work edit UI+server
+- plugin edit UI+server
+- account create UI+server
+- account role assignment UI+server

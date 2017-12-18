@@ -21,6 +21,9 @@ RUN cd hub-app; `npm bin`/ng build -bh /2/musichub/
 COPY server server
 RUN cd server; npm run build
 
+COPY mounts mounts
+COPY plugins plugins
+
 # TODO: use secrets
 ENV MUSICHUB_PASSWORD ''
 ENV REDIS_PASSWORKD ''

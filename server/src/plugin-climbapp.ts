@@ -18,25 +18,25 @@ const LOGPROCAPIURL_SETTING = 'logprocapiurl'
 const actions:PluginAction [] = [
   {
     "id":REDIS_LIST,
-    "title":"Show state",
+    "title":"Show app state",
     "description":"Show live app state",
     "confirm":false
   },
   {
     "id":REDIS_CLEAR,
-    "title":"Reset state",
+    "title":"Reset app state",
     "description":"Reset live app state",
     "confirm":true
   },
   {
     "id":APP_CONFIG,
-    "title":"Configure",
+    "title":"Configure app",
     "description":"Generate/update app configuration",
     "confirm":true
   },
   {
     "id":GET_URL,
-    "title":"Get URL",
+    "title":"Get app URL",
     "description":"Get external app URL",
     "confirm":false
   },
@@ -259,7 +259,7 @@ export class ClimbappPlugin extends PluginProvider {
             // template logprocurl!
             vars.settings.logprocapiurl = this.template(logprocapiurl, vars)
             data = this.template(data, vars)
-            resolve({message:`MPM config returned`, download: { filename: 'mpm-'+perfint.guid+'.json', data: data }})
+            resolve({message:`MPM config returned`, download: { filename: 'mpm-'+perfint.guid+'.json', mimeType: 'application/json', data: data }})
           })
         })
         .catch((err) => reject(err))
