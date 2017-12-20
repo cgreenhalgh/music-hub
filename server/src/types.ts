@@ -37,6 +37,7 @@ export interface Performance {
   status:string
   linked_performanceid:number
   linked_performance?:Performance
+  rev_linked_performance?:Performance
 }
 
 export enum Role {

@@ -8,6 +8,8 @@
       <p>Performer: {{performance.performer_title}}</p>
       <p>Venue: {{performance.venue_title}}</p>
       <p>Status: {{performance.status}}</p>
+      <p *ngIf="performance.linked_performance">Preceded by: {{performance.linked_performance.title}}, performed by {{performance.linked_performance.performer_title}}</p>
+      <p *ngIf="performance.rev_linked_performance">Followed by: {{performance.rev_linked_performance.title}}, performed by {{performance.rev_linked_performance.performer_title}}</p>
     </div>
     <h3>Tools</h3>
     <div *ngIf="error2" class="alert alert-danger">Error: {{error}}</div>

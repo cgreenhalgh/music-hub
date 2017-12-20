@@ -311,6 +311,37 @@ export function getRawPerformance(performanceid:number) : Promise<Performance> {
     
   })
 }
+// low-level - no security
+// one level only
+// TODO multiple?
+export function getRawRevLinkedPerformanceId(performance:Performance) : Promise<number> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT id FROM `performance` WHERE `linked_performanceid` = ?'
+      let params = [performance.id]
+      con.query(query, params, (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing getRawRevLinkedPerformances1 select: ${err.message}`)
+          reject(err)
+          return
+        }
+        con.release()
+        if (results.length==0)
+          resolve(null)
+        else
+          resolve(results[0].id)
+      })
+    })
+    
+  })
+}
 
 function mapPerformanceIntegration(result:any) : PerformanceIntegration {
   if (!result)
@@ -512,6 +543,35 @@ export function getRawPerformanceIntegration(perfintid:number) : Promise<Perform
       // Use the connection
       let query = 'SELECT * FROM `performance_integration` WHERE `id` = ?'
       let params = [perfintid]
+      con.query(query, params, (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing getRawPerformanceIntegration select: ${err.message}`)
+          reject(err)
+          return
+        }
+        con.release()
+        if (results.length==0) {
+          resolve(null)
+        }
+        let perfint:PerformanceIntegration = mapPerformanceIntegration(results[0])
+        resolve(perfint)
+      })
+    })
+  })
+}
+// low-level - internal - no security
+export function getRawPerformanceIntegration2(pluginid:number, performanceid:number) : Promise<PerformanceIntegration> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `performance_integration` WHERE `performanceid` = ? AND `pluginid` = ?'
+      let params = [performanceid, pluginid]
       con.query(query, params, (err, results, fields) => {
         if (err) {
           con.release()

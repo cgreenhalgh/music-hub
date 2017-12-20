@@ -4,7 +4,7 @@ import * as fs from 'fs'
 
 import { PluginProvider, registerPlugin, getPluginDir, getMountDir } from './plugins'
 import { PerformanceIntegration, PluginAction, PluginActionResponse } from './types'
-import { getRawPerformanceIntegration, getRawPerformance, getRawPluginSetting } from './db'
+import { getRawPerformanceIntegration, getRawPerformance, getRawPluginSetting, getRawRevLinkedPerformanceId, getRawPerformanceIntegration2 } from './db'
 
 const PLUGIN_CODE = 'climbapp'
 const REDIS_LIST = "redis-list"
@@ -61,6 +61,7 @@ interface MuzivisualPerformance {
   location:string
   performer:string
   guid:string
+  time?:number
 }
 interface MuzivisualConfig {
   // TODO refine types?!
@@ -69,6 +70,30 @@ interface MuzivisualConfig {
   narrative?:any[]
   performances?:MuzivisualPerformance[]
   performers?:string[]
+}
+
+interface MpmExpect {
+  id:string
+  name:string
+  kind:string
+  level:string
+  testPoint?:string
+  requires?:string[]
+  like?:string
+  button?:string
+}
+interface MpmConfig {
+  expect:MpmExpect[]
+}
+const mpmExpectPerformance:MpmExpect = {
+  "id": "musicodes.performanceid.{{guid}}",
+  "name": "= {{performance.title}}",
+  "kind": "TestPoint",
+  "level": "warning",
+  "testPoint": "performanceid",
+  "requires": ["musicodes.player"],
+  "like": "{{guid}}",
+  "button": "{{guid}}"
 }
 
 export class ClimbappPlugin extends PluginProvider {
@@ -161,6 +186,7 @@ export class ClimbappPlugin extends PluginProvider {
     .catch((err) => resolve({message:'Error getting integration state', error: err}))
   }
   appConfig(resolve, reject):void {
+    let debug = false
     console.log(`configure climbapp ${this.perfint.id} for performance ${this.perfint.performanceid}`)
     getRawPerformanceIntegration(this.perfint.id)
     .then((perfint) => {
@@ -197,19 +223,87 @@ export class ClimbappPlugin extends PluginProvider {
           if (!mconfig.performers) 
             mconfig.performers = []
           mconfig.performers.push(perf.performer_bio)
-          // write output
-          let outputfile = getMountDir(PLUGIN_CODE, 'muzivisual2')+'/'+perfint.guid+'.json'
-          console.log(`write climbapp config to ${outputfile}`)
-          fs.writeFile(outputfile, JSON.stringify(mconfig), 'utf8', (err) => {
-            if(err) {
-              resolve({message:`Error writing app config file ${outputfile}`, error: err})
-              return
-            }
-            let resp:PluginActionResponse = { 
-              message:`Wrote app config file ${outputfile}`
-            }
-            resolve(resp)
-          })
+            
+          // linked performances
+          // rev linked performance
+          getRawRevLinkedPerformanceId(perf)
+            .then((lpid) => {
+              if (debug) console.log(`rev linked performance ${lpid} ...`)
+              if (lpid!==null) {
+                if (debug) console.log(`intergration ${this.perfint.id} performance ${perf.id} has reverse link ${lpid}`)
+                return getRawPerformance(lpid)
+                  .then((p) => {
+                    // add expect
+                    if (p) {
+                      return getRawPerformanceIntegration2(this.perfint.pluginid, lpid)
+                        .then((pi2) => {
+                          if (pi2 && pi2.enabled) {
+                            let mperf2 : MuzivisualPerformance = {
+                              title: p.title,
+                              location: p.location,
+                              performer: p.performer_title,
+                              guid:pi2.guid
+                            }
+                            // rev linked -> afterwards
+                            mconfig.performances.push(mperf2)
+                            if (debug) console.log(`  added rev linked perf integration ${pi2.guid}`)
+                          }
+                          else {
+                            console.log(`Warning: rev linked perf integration ${this.perfint.pluginid} / ${lpid} not found / disabled`, pi2)
+                          }
+                        })
+                    }
+                  })
+              }
+            })
+            // linked_performance
+            .then(() => {
+              if (debug) console.log(`linked performance ${perf.linked_performanceid} ...`)
+              if (perf.linked_performanceid) {
+                if (debug) console.log(`intergration ${this.perfint.id} performance ${perf.id} has link ${perf.linked_performanceid}`)
+                return getRawPerformance(perf.linked_performanceid)
+                  .then((p) => {
+                    // add expect
+                    if (p) {
+                      return getRawPerformanceIntegration2(this.perfint.pluginid, perf.linked_performanceid)
+                        .then(pi2 => {
+                          if (pi2 && pi2.enabled) {
+                            let mperf2 : MuzivisualPerformance = {
+                              title: p.title,
+                              location: p.location,
+                              performer: p.performer_title,
+                              guid:pi2.guid,
+                              // TODO a proper time? just make it future for now
+                              time:2000000000000
+                            }
+                            // rev linked -> pastPerformances, reverse
+                            mconfig.pastPerformances.push(mperf2)
+                            if (debug) console.log(`  added linked perf integration ${pi2.guid}`)
+                          }
+                          else {
+                            console.log(`Warning: linked perf integration ${this.perfint.pluginid} / ${perf.linked_performanceid} not found / disabled`, pi2)
+                          }
+                        })
+                    }
+                  })
+              }
+            })
+            .then(() => {
+              // write output
+              let outputfile = getMountDir(PLUGIN_CODE, 'muzivisual2')+'/'+perfint.guid+'.json'
+              console.log(`write climbapp config to ${outputfile}`)
+              fs.writeFile(outputfile, JSON.stringify(mconfig), 'utf8', (err) => {
+                if(err) {
+                  resolve({message:`Error writing app config file ${outputfile}`, error: err})
+                  return
+                }
+                let resp:PluginActionResponse = { 
+                  message:`Wrote app config file ${outputfile}`
+                }
+                resolve(resp)
+              })
+            })
+           .catch((err) => reject(err))
         })
       })
       .catch((err) => reject(err))
@@ -238,6 +332,7 @@ export class ClimbappPlugin extends PluginProvider {
     .catch((err) => reject(err))
   }
   getMpmConfig(resolve, reject):void {
+    let debug = false
     console.log(`get mpm config climbapp ${this.perfint.id} for performance ${this.perfint.performanceid}`)
     getRawPerformanceIntegration(this.perfint.id)
     .then((perfint) => {
@@ -253,6 +348,7 @@ export class ClimbappPlugin extends PluginProvider {
         }
         getRawPerformance(this.perfint.performanceid)
         .then((perf) => {
+          if (debug) console.log(`mpm config found performance ${perf.id}`)
           let templatefile = getPluginDir(PLUGIN_CODE) + '/mpm-config.json'
           fs.readFile(templatefile, 'utf8', (err, data) => {
             if(err) {
@@ -269,7 +365,74 @@ export class ClimbappPlugin extends PluginProvider {
             // template logprocurl!
             vars.settings.logprocapiurl = this.template(logprocapiurl, vars)
             data = this.template(data, vars)
-            resolve({message:`MPM config returned`, download: { filename: 'mpm-'+perfint.guid+'.json', mimeType: 'application/json', data: data }})
+            let json:MpmConfig = JSON.parse(data) as MpmConfig
+            // insert performance id(s)
+            let ix = 0
+            for (ix=0; ix<json.expect.length; ix++) {
+              if ('musicodes.performanceid'==json.expect[ix].id) {
+                ix++
+                break
+              }
+            }
+            let ex = JSON.parse(this.template(JSON.stringify(mpmExpectPerformance), vars))
+            json.expect.splice(ix, 0, ex)
+            // rev linked performance
+            getRawRevLinkedPerformanceId(perf)
+            .then((lpid) => {
+              if (debug) console.log(`rev linked performance ${lpid} ...`)
+              if (lpid!==null) {
+                if (debug) console.log(`intergration ${this.perfint.id} performance ${perf.id} has reverse link ${lpid}`)
+                return getRawPerformance(lpid)
+                  .then((p) => {
+                    // add expect
+                    if (p) {
+                      return getRawPerformanceIntegration2(this.perfint.pluginid, lpid)
+                        .then((pi2) => {
+                          if (pi2 && pi2.enabled) {
+                            vars.performance = p
+                            vars.guid = pi2.guid
+                            let ex = JSON.parse(this.template(JSON.stringify(mpmExpectPerformance), vars))
+                            json.expect.splice(ix+1, 0, ex)
+                            if (debug) console.log(`  added rev linked perf integration ${pi2.guid}`)
+                          }
+                          else {
+                            console.log(`Warning: rev linked perf integration ${this.perfint.pluginid} / ${lpid} not found / disabled`, pi2)
+                          }
+                        })
+                    }
+                  })
+              }
+            })
+            // linked_performance
+            .then(() => {
+              if (debug) console.log(`linked performance ${perf.linked_performanceid} ...`)
+              if (perf.linked_performanceid) {
+                if (debug) console.log(`intergration ${this.perfint.id} performance ${perf.id} has link ${perf.linked_performanceid}`)
+                return getRawPerformance(perf.linked_performanceid)
+                  .then((p) => {
+                    // add expect
+                    if (p) {
+                      return getRawPerformanceIntegration2(this.perfint.pluginid, perf.linked_performanceid)
+                        .then(pi2 => {
+                          if (pi2 && pi2.enabled) {
+                            vars.performance = p
+                            vars.guid = pi2.guid
+                            let ex = JSON.parse(this.template(JSON.stringify(mpmExpectPerformance), vars))
+                            json.expect.splice(ix, 0, ex)
+                            if (debug) console.log(`  added linked perf integration ${pi2.guid}`)
+                          }
+                          else {
+                            console.log(`Warning: linked perf integration ${this.perfint.pluginid} / ${perf.linked_performanceid} not found / disabled`, pi2)
+                          }
+                        })
+                    }
+                  })
+              }
+            })
+            .then(() => {
+              resolve({message:`MPM config returned`, download: { filename: 'mpm-'+perfint.guid+'.json', mimeType: 'application/json', data: JSON.stringify(json) }})
+            })
+           .catch((err) => reject(err))
           })
         })
         .catch((err) => reject(err))

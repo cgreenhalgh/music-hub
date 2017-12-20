@@ -82,6 +82,11 @@ curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/
 curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/1/get-url
 curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/2/get-url
 curl -X POST -v http://adrian:PW@localhost:8000/api/1/performance/3/integration/1/get-mpm-config
+// linked...
+curl -X POST -v http://root%40musichub:PW@localhost:8000/api/1/performance/1/integration/1/get-mpm-config
+curl -X POST -v http://root%40musichub:PW@localhost:8000/api/1/performance/1/integration/2/get-mpm-config
+curl -X POST -v http://root%40musichub:PW@localhost:8000/api/1/performance/1/integration/1/app-config
+curl -X POST -v http://root%40musichub:PW@localhost:8000/api/1/performance/1/integration/2/app-config
 ```
 
 

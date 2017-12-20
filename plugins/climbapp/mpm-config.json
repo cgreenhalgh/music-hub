@@ -38,16 +38,6 @@
 			"show": true
 		},
 		{
-			"id": "musicodes.performanceid.guid",
-			"name": "= {{performance.title}}",
-			"kind": "TestPoint",
-			"level": "warning",
-			"testPoint": "performanceid",
-			"requires": ["musicodes.player"],
-			"like": "{{guid}}",
-			"button": "{{guid}}"
-		},
-		{
 			"id": "visuals.browserview",
 			"name": "'visuals' browser view",
 			"kind": "Report",

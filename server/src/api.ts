@@ -1,8 +1,9 @@
 import * as express from 'express'
 import * as fs from 'fs'
 
-import { Work, Download } from './types'
-import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, getPerformanceIntegration } from './db'
+import { Work, Performance, Download } from './types'
+import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
+  getPerformanceIntegration, getRawRevLinkedPerformanceId } from './db'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 import { Capability, hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -128,12 +129,27 @@ router.get('/performance/:performanceid', (req, res) => {
     res.sendStatus(404)
     return
   }
+  let ps:Performance[] = []
   //console.log(`get work ${workid}`)
   getPerformance(req.user, performanceid)
-  .then((work) => {
-    res.setHeader('Content-type', 'application/json')
-    res.send(JSON.stringify(work))
+  .then((p) => {
+    ps.push(p)
+    if (p.linked_performanceid!==null)
+      return getPerformance(req.user, p.linked_performanceid)
+        .then(lp => {ps[0].linked_performance = lp})
   })
+  .then(() => {
+    return getRawRevLinkedPerformanceId(ps[0])
+      .then((lpid) => {
+        if (lpid!==null)
+          return getPerformance(req.user, lpid)
+            .then(lp => {ps[0].rev_linked_performance = lp})
+    })
+  })
+  .then(() => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(ps[0]))
+   })
   .catch((err) => {
     sendError(res, err)
   })
