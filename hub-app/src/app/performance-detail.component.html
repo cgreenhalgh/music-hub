@@ -16,7 +16,7 @@
     <div *ngIf="loading2">Loading plugins...</div>
     <ul>
       <li *ngFor="let perfint of performanceIntegrations">
-        <a [routerLink]="['/performance',performance.id,'integration',perfint.plugin.id]" >{{perfint.plugin.title}} ({{perfint.plugin.code}})</a>, Enabled: {{perfint.enabled}}
+        <a [routerLink]="['/performance',perfint.performanceid,'integration',perfint.plugin.id]" >{{perfint.plugin.title}} ({{perfint.plugin.code}})</a>, Enabled: {{perfint.enabled}}
       </li>
     </ul>
   </div>
