@@ -246,6 +246,7 @@ export class ClimbappPlugin extends PluginProvider {
                             }
                             // rev linked -> afterwards
                             mconfig.performances.push(mperf2)
+                            mconfig.performers.push(p.performer_bio)
                             if (debug) console.log(`  added rev linked perf integration ${pi2.guid}`)
                           }
                           else {
@@ -278,6 +279,7 @@ export class ClimbappPlugin extends PluginProvider {
                             }
                             // rev linked -> pastPerformances, reverse
                             mconfig.pastPerformances.push(mperf2)
+                            mconfig.performers.splice(0, 0, p.performer_bio)
                             if (debug) console.log(`  added linked perf integration ${pi2.guid}`)
                           }
                           else {

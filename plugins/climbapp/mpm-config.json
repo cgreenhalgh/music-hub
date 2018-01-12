@@ -38,6 +38,35 @@
 			"show": true
 		},
 		{
+			"id": "musicodes.pedalnextpiece",
+			"name": "Pedal skips to next piece",
+			"kind": "TestPoint",
+			"level": "information",
+			"testPoint": "pedalnextpiece",
+			"requires": ["musicodes.player"],
+			"show": true
+		},
+		{
+			"id": "musicodes.pedalnextpiece.no",
+			"name": "= No, pedal does next PAGE",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "pedalnextpiece",
+			"requires": ["musicodes.player"],
+			"like": "no",
+			"button": "no"
+		},
+		{
+			"id": "musicodes.pedalnextpiece.yes",
+			"name": "= Yes, pedal does next PIECE",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "pedalnextpiece",
+			"requires": ["musicodes.player"],
+			"like": "yes",
+			"button": "yes"
+		},
+		{
 			"id": "visuals.browserview",
 			"name": "'visuals' browser view",
 			"kind": "Report",
@@ -83,7 +112,7 @@
 		},
 		{
 			"id": "meld.browserview",
-			"name": "'meld' browser view",
+			"name": "'meld' browser view (new meld)",
 			"kind": "Report",
 			"level": "error",
 			"maxCardinality": 1,
@@ -107,23 +136,43 @@
 		},
 		{
 			"id": "meld.browserview.climburl",
-			"name": "= start the climb",
+			"name": "= start the climb (show score)",
 			"kind": "TestPoint",
 			"level": "warning",
 			"testPoint": "url",
 			"requires": ["meld.browserview"],
-			"like": "http://127.0.0.1:5000/startTheClimb",
-			"button": "http://127.0.0.1:5000/startTheClimb"
+			"like": "http://127.0.0.1:8081/startTheClimb",
+			"button": "http://127.0.0.1:8081/startTheClimb"
 		},
 		{
 			"id": "meld.browserview.climburl.load",
-			"name": "= auto-start start the climb",
+			"name": "= auto-start start the climb (show score)",
 			"kind": "TestPoint",
 			"level": "warning",
 			"testPoint": "url",
 			"requires": ["meld.browserview"],
-			"like": "http://127.0.0.1:5000/startTheClimb?load",
-			"button": "http://127.0.0.1:5000/startTheClimb?load"
+			"like": "http://127.0.0.1:8081/startTheClimb?load",
+			"button": "http://127.0.0.1:8081/startTheClimb?load"
+		},
+		{
+			"id": "meld.browserview.climburl",
+			"name": "= start the climb (hide score)",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "url",
+			"requires": ["meld.browserview"],
+			"like": "http://127.0.0.1:8081/startTheClimb?noscore",
+			"button": "http://127.0.0.1:8081/startTheClimb?noscore"
+		},
+		{
+			"id": "meld.browserview.climburl.load",
+			"name": "= auto-start start the climb (hide score)",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "url",
+			"requires": ["meld.browserview"],
+			"like": "http://127.0.0.1:8081/startTheClimb?load&noscore",
+			"button": "http://127.0.0.1:8081/startTheClimb?load&noscore"
 		},
 		{
 			"id": "meld.browserview.reload",
