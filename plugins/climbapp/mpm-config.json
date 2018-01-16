@@ -101,15 +101,40 @@
 			"button": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000"
 		},
 		{
-			"id": "visuals.browserview.climburl",
-			"name": "= Climb visuals (NB fix IP address!) - test",
+			"id": "stageview.browserview",
+			"name": "'stageview' browser view",
+			"kind": "Report",
+			"level": "warning",
+			"maxCardinality": 1,
+			"like": {
+				"@type": "Process",
+				"processType": "BrowserView",
+				"title": "Browserview - Music Performance Manager",
+				"config": {
+					"name": "stageview"
+				}
+			}
+		},
+		{
+			"id": "stageview.browserview.url",
+			"name": "URL",
+			"kind": "TestPoint",
+			"level": "information",
+			"testPoint": "url",
+			"requires": ["stageview.browserview"],
+			"show": true
+		},
+		{
+			"id": "stageview.browserview.slaveurl",
+			"name": "= Paper score prompt",
 			"kind": "TestPoint",
 			"level": "warning",
 			"testPoint": "url",
-			"requires": ["visuals.browserview"],
-			"like": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000&test",
-			"button": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000&test"
+			"requires": ["stageview.browserview"],
+			"like": "http://127.0.0.1:3000/fullscreenslave.html?c=stageview",
+			"button": "http://127.0.0.1:3000/fullscreenslave.html?c=stageview"
 		},
+
 		{
 			"id": "meld.browserview",
 			"name": "'meld' browser view (new meld)",
@@ -153,35 +178,6 @@
 			"requires": ["meld.browserview"],
 			"like": "http://127.0.0.1:8081/startTheClimb?load",
 			"button": "http://127.0.0.1:8081/startTheClimb?load"
-		},
-		{
-			"id": "meld.browserview.climburl",
-			"name": "= start the climb (hide score)",
-			"kind": "TestPoint",
-			"level": "warning",
-			"testPoint": "url",
-			"requires": ["meld.browserview"],
-			"like": "http://127.0.0.1:8081/startTheClimb?noscore",
-			"button": "http://127.0.0.1:8081/startTheClimb?noscore"
-		},
-		{
-			"id": "meld.browserview.climburl.load",
-			"name": "= auto-start start the climb (hide score)",
-			"kind": "TestPoint",
-			"level": "warning",
-			"testPoint": "url",
-			"requires": ["meld.browserview"],
-			"like": "http://127.0.0.1:8081/startTheClimb?load&noscore",
-			"button": "http://127.0.0.1:8081/startTheClimb?load&noscore"
-		},
-		{
-			"id": "meld.browserview.reload",
-			"name": "Reload MELD",
-			"kind": "TestPoint",
-			"level": "information",
-			"testPoint": "reload",
-			"requires": ["meld.browserview"],
-			"button": null
 		},
 		{
 			"id": "logproc.probe",
