@@ -38,6 +38,16 @@
 			"show": true
 		},
 		{
+			"id": "musicodes.performanceid.test",
+			"name": "= test",
+			"kind": "TestPoint",
+			"level": "warning",
+			"testPoint": "performanceid",
+			"requires": ["musicodes.player"],
+			"like": "test",
+			"button": "test"
+		},
+		{
 			"id": "musicodes.pedalnextpiece",
 			"name": "Pedal skips to next piece",
 			"kind": "TestPoint",
@@ -97,6 +107,7 @@
 			"level": "warning",
 			"testPoint": "url",
 			"requires": ["visuals.browserview"],
+			"after": ["musicodes.player"],
 			"like": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000",
 			"button": "http://localhost:3000/climbview.html#?config=http:%2F%2F{{ip}}:3000%2Fcontent%2FmkGameEngine-view.json&sio=http:%2F%2F{{ip}}:3000"
 		},
@@ -131,6 +142,7 @@
 			"level": "warning",
 			"testPoint": "url",
 			"requires": ["stageview.browserview"],
+			"after": ["musicodes.player"],
 			"like": "http://127.0.0.1:3000/fullscreenslave.html?c=stageview",
 			"button": "http://127.0.0.1:3000/fullscreenslave.html?c=stageview"
 		},
@@ -176,6 +188,7 @@
 			"level": "warning",
 			"testPoint": "url",
 			"requires": ["meld.browserview"],
+			"after": ["musicodes.player", "musicodes.performanceid"],
 			"like": "http://127.0.0.1:8081/startTheClimb?load",
 			"button": "http://127.0.0.1:8081/startTheClimb?load"
 		},
