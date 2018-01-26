@@ -1,0 +1,29 @@
+{
+	"@id": "/annalist/c/annalist_performance_archive/d/Recording/{{performanceid}}_{{recordingid}}/",
+	"@type": [
+		"frbroo:F26_Recording",
+		"prov:Entity",
+		"crm:E70_Thing",
+		"crm:E71_Man-Made_Thing",
+		"crm:E28_Conceptual_Object",
+		"frbroo:F2_Expression",
+		"mo:MusicalExpression",
+		"annal:EntityData"
+	],
+	"annal:id": "{{performanceid}}_{{recordingid}}",
+	"annal:type": "frbroo:F26_Recording",
+	"annal:type_id": "Recording",
+	"annal:url": "/annalist/c/annalist_performance_archive/d/Recording/{{performanceid}}_{{recordingid}}/",
+	"coll:linked_audio_clips": [
+		{
+			"coll:linked_audio_m": "Linked_audio/{{performanceid}}_{{recordingid}}"
+		}
+	],
+	"coll:linked_images": [],
+	"entity:seeAlso_r": [],
+	"mo:records": "Performance/{{performanceid}}",
+	"prov:hadMember_repeat": [],
+	"prov:startedAtTime": "{{datetime}}",
+	"rdfs:comment": "{{description}}",
+	"rdfs:label": "Recording of {{recordingid}} from {{performancetitle}}"
+}

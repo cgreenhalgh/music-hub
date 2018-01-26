@@ -83,6 +83,30 @@ In the short term the past performance information can be taken from a fixed fil
 
 The plugin will need to be able to write files to the app's `data/` folder, and read the past performances file.
 
+### Climb archive integration
+
+Needs to generate per-server urls file (`urls.json`, array of app-relative datafile URLs) in the archive's `assets/data/` folder. This includes links to:
+- various initial files including premiere performance info, climb structure
+- hub performance metadata data, with entries for every hub-managed performance in the archive (see below)
+- per-performance history log file view, with specific start time, section performances and triggered codes. This is initially just a standard 'empty' (i.e. recordless) archive/analist data file.
+
+Needs to generate per-server performance metadata file, with, for each performance:
+- Performance record (Note: these all need to be in the same file and that file needs to be readable by the logproc log processor)
+- Person record for performaer
+- ? Location record for venue
+- Recording records for every available recording of the Performance (unless they are in a separate per-performance recordings file)
+
+Note, this being in one file implies coordinated archive-wide output generation. Unless this is a two-stage process with intermediate output files per performance. Or unless the logproc can use the same indirection. 
+Plan A: per-performance files; combined into one. With locking.
+
+Template files:
+- `archive-performance.json` - `{{performanceid}}`, `{{performancetitle}}`, `{{systemid}}`, `{{datetime}}`, `{{description}}`, `{{performerid}}` (person id)
+- `archive-person.json` - `{{personid}}`, `{{persontitle}}`, `{{bio}}`
+- `archive-recording.json` - replace `{{performanceid}}`, `{{performancetitle}}`, `{{recordingid}}`, `{{datetime}}`, `{{description}}`
+- `archive-audio-clip.json` - replace `{{performanceid}}`, `{{performancetitle}}`, `{{recordingid}}`, `{{url}}`
+- `archive-urls.json` - initial urls (array)
+- `archive-empty.json` - 'empty' data file - add items to object's `annal:entity_list` array. 
+
 ## Data and Access Model
 
 Multiple user _accounts_ (local).

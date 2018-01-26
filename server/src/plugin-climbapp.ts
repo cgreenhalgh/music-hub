@@ -4,7 +4,7 @@ import * as fs from 'fs'
 
 import { PluginProvider, registerPlugin, getPluginDir, getMountDir } from './plugins'
 import { PerformanceIntegration, PluginAction, PluginActionResponse } from './types'
-import { getRawPerformanceIntegration, getRawPerformance, getRawPluginSetting, getRawRevLinkedPerformanceId, getRawPerformanceIntegration2 } from './db'
+import { getRawPerformanceIntegration, getRawPerformance, getRawPluginSetting, getRawRevLinkedPerformanceId, getRawPerformanceIntegration2, getRawPerformanceIntegrationSetting, setRawPerformanceIntegrationSetting } from './db'
 
 const PLUGIN_CODE = 'climbapp'
 const REDIS_LIST = "redis-list"
@@ -13,9 +13,14 @@ const APP_CONFIG = "app-config"
 const GET_URL = "get-url"
 const GET_MPM_CONFIG = "get-mpm-config"
 const GET_MUZICODES_SETTINGS = "get-muzicodes-settings"
+const ARCHIVE_INCLUDE = "archive-include"
+const ARCHIVE_EXCLUDE = "archive-exclude"
+const ARCHIVE_RESET_LOG = 'archive-reset-log'
 const APPURL_SETTING = 'appurl'
 const LOGPROCAPIURL_SETTING = 'logprocapiurl'
 const REDISHOST_SETTING = 'redishost'
+const MOUNT_ARCHIVE = 'archive'
+const SETTING_ARCHIVE = 'archive'
 
 const actions:PluginAction [] = [
   {
@@ -53,6 +58,24 @@ const actions:PluginAction [] = [
     "title":"Get Muzicodes settings",
     "description":"Get muzicodes app link (global) settings",
     "confirm":false
+  },
+  {
+    "id":ARCHIVE_INCLUDE,
+    "title":"Add to archive",
+    "description":"Generate/update archive configuration to include this performance",
+    "confirm":true
+  },
+  {
+    "id":ARCHIVE_EXCLUDE,
+    "title":"Not in archive",
+    "description":"Generate/update archive configuration to EXCLUDE this performance",
+    "confirm":true
+  },
+  {
+    "id":ARCHIVE_RESET_LOG,
+    "title":"Reset archive",
+    "description":"Reset archive state to unperformed",
+    "confirm":true
   }
 ]
 
@@ -141,6 +164,12 @@ export class ClimbappPlugin extends PluginProvider {
         this.getMpmConfig(resolve, reject)
       else if (GET_MUZICODES_SETTINGS==action)
         this.getMuzicodesSettings(resolve, reject)
+      else if (ARCHIVE_INCLUDE==action)
+        this.archiveUpdate(true, resolve, reject)
+      else if (ARCHIVE_EXCLUDE==action)
+        this.archiveUpdate(false, resolve, reject)
+      else if (ARCHIVE_RESET_LOG==action)
+        this.archiveResetLog(resolve, reject)
       else
         resolve({message:'Unknown action on climbapp', error: new Error('Unknown action')})
     })
@@ -488,5 +517,69 @@ export class ClimbappPlugin extends PluginProvider {
       resolve({message:`Use redis: yes; Redis host: ${redishost}; Redis port: 6379; Redis password: ${process.env.REDIS_PASSWORD}`})
     })
     .catch((err) => reject(err))
+  }
+  archiveWriteEmptyLog(guid:string, skipIfExists:boolean): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let templatefile = getPluginDir(PLUGIN_CODE) + '/archive-empty.json'
+      fs.readFile(templatefile, 'utf8', (err, data) => {
+        if(err) {
+          reject(err)
+          return
+        }
+        let outputfile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/log-'+guid+'.json'
+        fs.access(outputfile, (err) => {
+          if (skipIfExists && err) {
+            console.log(`archive log file already exists: ${outputfile}`)
+            resolve()
+          } else {
+            let flag = skipIfExists ? 'x' : 'w'
+            console.log(`write archive empty log file to ${outputfile}`)
+            fs.writeFile(outputfile, data, {encoding:'utf8', flag:flag}, (err) => {
+              if(err) {
+                reject(err)
+                return
+              }
+              resolve()
+            })
+          }
+        })
+      })
+    })
+  }
+  archiveUpdate(include:boolean, resolve, reject):void {
+    this.init()
+    getRawPerformanceIntegration(this.perfint.id)
+    .then((perfint) => {
+      if (!perfint.guid) {
+        resolve({message:'GUID not set on climbapp integration', error: new Error('GUID not set')})
+        return
+      }
+      return setRawPerformanceIntegrationSetting(perfint.id, perfint.pluginid, perfint.performanceid, SETTING_ARCHIVE, include ? '1' : '0')
+        .then(() => {
+          // TODO - update files
+          if (include) {
+            resolve({message:`Included in archive`})
+          } else {
+            resolve({message:`Excluded from archive`})
+          }
+        })
+    })
+    .catch((err) => resolve({message:'Error getting integration state', error: err}))
+  }
+  archiveResetLog(resolve, reject):void {
+    this.init()
+    getRawPerformanceIntegration(this.perfint.id)
+    .then((perfint) => {
+      if (!perfint.guid) {
+        resolve({message:'GUID not set on climbapp integration', error: new Error('GUID not set')})
+        return
+      }
+      //let key = 'performance:'+perfint.guid
+      return this.archiveWriteEmptyLog(perfint.guid, false)
+        .then(() =>
+          resolve({message:`Cleared log for performance ${perfint.guid}`})
+        )
+    })
+    .catch((err) => resolve({message:'Error getting integration state', error: err}))
   }
 }

@@ -103,4 +103,5 @@ export interface PerformanceIntegration {
   plugin?:Plugin
   enabled:boolean
   guid?:string
+  settings?:PluginSetting[]
 }

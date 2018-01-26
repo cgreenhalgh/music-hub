@@ -156,6 +156,20 @@ CREATE TABLE musichub.performance_integration (
 	FOREIGN KEY (pluginid) REFERENCES musichub.plugin(id)	
 );
 
+-- performance-specific integration setting
+CREATE TABLE musichub.performance_integration_setting (
+	id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	perfintid INT UNSIGNED NOT NULL,
+	performanceid SMALLINT UNSIGNED NOT NULL,
+	pluginid SMALLINT UNSIGNED NOT NULL,
+	name VARCHAR(100) NOT NULL,
+	value TEXT,
+	PRIMARY KEY (id),
+	FOREIGN KEY (performanceid) REFERENCES musichub.performance(id),
+	FOREIGN KEY (pluginid) REFERENCES musichub.plugin(id),	
+	FOREIGN KEY (perfintid) REFERENCES musichub.performance_integration(id)
+);
+
 -- Climb! performances app integration(s)
 INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (1, 1, 1, '20180119-allyourbass1');
 INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (2, 1, 1, '20180119-allyourbass2');

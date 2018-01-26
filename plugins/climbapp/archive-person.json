@@ -1,0 +1,21 @@
+    {
+      "@id": "/annalist/c/annalist_performance_archive/d/Person/{{personid}}/",
+      "@type": [
+        "crm:E21_Person",
+        "prov:Entity",
+        "prov:Agent",
+        "crm:E39_Actor",
+        "crm:E77_Persistent_Item",
+        "annal:EntityData"
+      ],
+      "annal:id": "{{personid}}",
+      "annal:type": "crm:E21_Person",
+      "annal:type_id": "Person",
+      "annal:url": "/annalist/c/annalist_performance_archive/d/Person/{{personid}}/",
+      "entity:seeAlso_r": [
+      ],
+      "foaf:name": "{{persontitle}}",
+      "rdfs:comment": "{{bio}}",
+      "rdfs:label": "{{persontitle}}"
+    }
+

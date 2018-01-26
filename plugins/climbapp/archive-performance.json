@@ -1,0 +1,35 @@
+    {
+      "@id": "/annalist/c/annalist_performance_archive/d/Performance/{{performanceid}}/",
+      "@type": [
+        "frbroo:F31_Performance",
+        "prov:Activity",
+        "crm:E5_Event",
+        "crm:E7_Activity",
+        "mo:Performance",
+        "annal:EntityData"
+      ],
+      "annal:id": "{{performanceid}}",
+      "annal:type": "frbroo:F31_Performance",
+      "annal:type_id": "Performance",
+      "annal:url": "/annalist/c/annalist_performance_archive/d/Performance/{{performanceid}}/",
+      "coll:system_id": "{{systemid}}",
+      "coll:uploaded_image_r": [],
+      "entity:seeAlso_r": [],
+      "event:sub_event": [],
+      "frbroo:R25F_performed_r": [
+        {
+          "frbroo:R25F_performed": "Performed_work/Climb"
+        }s
+      ],
+      "prov:qualifiedAssociation": [
+        {
+          "crm:P12i_was_present_at": "Person/{{performerid}}",
+          "prov:hadRole": ""
+        }
+      ],
+      "prov:startedAtTime": "{{datetime}}",
+      "prov:used_r": [],
+      "rdfs:comment": "{{description}}",
+      "rdfs:label": "{{performancetitle}}"
+    }
+

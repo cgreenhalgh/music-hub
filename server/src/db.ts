@@ -436,7 +436,7 @@ function getRawPlugin(pluginid:number): Promise<Plugin> {
           return
         }
         let plugin:Plugin = results[0] as Plugin
-        // TODO settings
+        // settings
         con.query('SELECT `name`, `value` FROM `plugin_setting` WHERE `pluginid` = ?', [pluginid], (err, results, fields) => {
           if (err) {
             con.release()
@@ -480,6 +480,78 @@ export function getRawPluginSetting(pluginid:number, name:string): Promise<strin
     })
   })
 }
+// no perm check here - low-level
+export function getRawPerformanceIntegrationSetting(perfintid:number, name:string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      con.query('SELECT (`value`) FROM `performance_integration_setting` WHERE `perfintid` = ? AND `name` = ?', [perfintid, name], (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing getPerformanceIntegrationSetting select: ${err.message}`)
+          reject(err)
+          return
+        }
+        con.release()
+        //console.log('getRawPluginSetting', results)
+        if (results.length==0) {
+          resolve(null)
+          return 
+        }
+        resolve(results[0].value)
+      })
+    })
+  })
+}
+// no perm check here - low-level
+export function setRawPerformanceIntegrationSetting(perfintid:number, pluginid:number, performanceid:number, name:string, value:string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      con.query('SELECT (`id`) FROM `performance_integration_setting` WHERE `perfintid` = ? AND `name` = ?', [perfintid, name], (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing setPerformanceIntegrationSetting select: ${err.message}`)
+          reject(err)
+          return
+        }
+        if (results.length==0) {
+          con.query('INSERT `performance_integration_setting` (`perfintid`, `performanceid`, `pluginid`, `name`, `value`) VALUES (?,?,?,?,?)', [perfintid, performanceid, pluginid, name, value], (err) => {
+            con.release()
+            if (err) {
+              console.log(`Error doing setPerformanceIntegrationSetting insert: ${err.message}`)
+              reject(err)
+              return
+            }
+            resolve()
+            return 
+          })
+        } else {
+          con.query('UPDATE `performance_integration_setting` SET `value` = ? WHERE `perfintid` = ? AND `name` = ?', [value, perfintid, name], (err) => {
+            con.release()
+            if (err) {
+              console.log(`Error doing setPerformanceIntegrationSetting update: ${err.message}`)
+              reject(err)
+              return
+            }
+            resolve()
+            return 
+          })
+        }
+      })
+    })
+  })
+}
 
 export function getPerformanceIntegration(account:Account, performanceid:number, pluginid:number) : Promise<PerformanceIntegration> {
   return new Promise((resolve, reject) => {
@@ -504,8 +576,8 @@ export function getPerformanceIntegration(account:Account, performanceid:number,
               reject(err)
               return
             }
-            con.release()
             if (results.length==0) {
+              con.release()
               // fake / disabled
               let perfint:PerformanceIntegration = {
                 id:0, // ??? hack ???
@@ -522,8 +594,18 @@ export function getPerformanceIntegration(account:Account, performanceid:number,
             let perfint:PerformanceIntegration = mapPerformanceIntegration(results[0])
             perfint.plugin = plugin
             perfint.performance = performance
-            resolve(perfint)
-            return
+            // settings
+            con.query('SELECT `name`, `value` FROM `performance_integration_setting` WHERE `perfintid` = ?', [perfint.id], (err, results, fields) => {
+              if (err) {
+                con.release()
+                console.log(`Error doing getPerformanceIntegration select: ${err.message}`)
+                reject(err)
+                return
+              }
+              con.release()
+              perfint.settings = results.map((s) => s as PluginSetting)
+              resolve(perfint)
+            })
           })
         })
       })

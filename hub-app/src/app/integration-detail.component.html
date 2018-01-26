@@ -9,6 +9,10 @@
         <li *ngFor="let setting of perfint.plugin.settings">{{setting.name}}: {{setting.value}}</li>
       </ul>
       <p>Plugin enabled: {{ perfint.enabled }}</p>
+      <p>Integration settings:</p>
+      <ul *ngIf="perfint.settings">
+        <li *ngFor="let setting of perfint.settings">{{setting.name}}: {{setting.value}}</li>
+      </ul>
       <p>Performance: {{perfint.performance.title}}</p>
       <p *ngIf="perfint.performance.work">Work: {{ perfint.performance.work.title }} ({{perfint.performance.work.year}})</p>
       <p>Performer: {{perfint.performance.performer_title}}</p>

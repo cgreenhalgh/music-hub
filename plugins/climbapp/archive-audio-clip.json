@@ -1,0 +1,14 @@
+{
+	"@id": "/annalist/c/annalist_performance_archive/d/Linked_audio/{{performanceid}}_{{recordingid}}/",
+	"@type": [
+		"coll:Linked_audio",
+		"annal:EntityData"
+	],
+	"annal:id": "{{performanceid}}_{{recordingid}}",
+	"annal:type": "coll:Linked_audio",
+	"annal:type_id": "Linked_audio",
+	"annal:url": "/annalist/c/annalist_performance_archive/d/Linked_audio/{{performanceid}}_{{recordingid}}/",
+	"coll:audio_clip": "{{url}}",
+	"rdfs:comment": "Audio of {{recordingid}} from {{performancetitle}}",
+	"rdfs:label": "Audio of {{recordingid}} from {{performancetitle}}"
+}
