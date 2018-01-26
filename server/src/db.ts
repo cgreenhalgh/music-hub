@@ -190,6 +190,10 @@ function mapPerformance(result:any) : Performance {
   delete result.public
   let perf:Performance = result as Performance
   perf.ispublic = bit2boolean(ispublic)
+  if ((perf.date as any) instanceof Date) {
+    // Date?!
+    perf.date = (perf.date as any).toISOString().slice(0, 10) 
+  }
   return perf
 }
 
@@ -671,3 +675,30 @@ export function getRawPerformanceIntegration2(pluginid:number, performanceid:num
     })
   })
 }
+// low-level - internal - no security
+export function getRawPerformanceIntegrationsForSetting(pluginid:number, setting:string, value:string) : Promise<PerformanceIntegration[]> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      con.query('SELECT `perfintid` FROM `performance_integration_setting` WHERE `pluginid` = ? AND `name` = ? AND `value` = ?', [pluginid, setting, value], (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing getRawPerformanceIntegrationsForPlugin select: ${err.message}`)
+          reject(err)
+          return
+        }
+        con.release()
+        let perfintps:Promise<PerformanceIntegration>[] = results.map((r) => getRawPerformanceIntegration(r.perfintid as number))
+        Promise.all(perfintps)
+        .then(perfints => resolve(perfints))
+        .catch(err => reject(err))
+      })
+    })
+  })
+}
+

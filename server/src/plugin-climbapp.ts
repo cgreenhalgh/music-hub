@@ -3,8 +3,9 @@ import * as redis from 'redis'
 import * as fs from 'fs'
 
 import { PluginProvider, registerPlugin, getPluginDir, getMountDir } from './plugins'
-import { PerformanceIntegration, PluginAction, PluginActionResponse } from './types'
-import { getRawPerformanceIntegration, getRawPerformance, getRawPluginSetting, getRawRevLinkedPerformanceId, getRawPerformanceIntegration2, getRawPerformanceIntegrationSetting, setRawPerformanceIntegrationSetting } from './db'
+import { PerformanceIntegration, Performance, PluginAction, PluginActionResponse } from './types'
+import { getRawPerformanceIntegration, getRawPerformance, getRawPluginSetting, getRawRevLinkedPerformanceId, getRawPerformanceIntegration2, 
+    getRawPerformanceIntegrationSetting, setRawPerformanceIntegrationSetting, getRawPerformanceIntegrationsForSetting } from './db'
 
 const PLUGIN_CODE = 'climbapp'
 const REDIS_LIST = "redis-list"
@@ -21,6 +22,9 @@ const LOGPROCAPIURL_SETTING = 'logprocapiurl'
 const REDISHOST_SETTING = 'redishost'
 const MOUNT_ARCHIVE = 'archive'
 const SETTING_ARCHIVE = 'archive'
+const ARCHIVE_URLS_PREFIX = 'assets/data/'
+const ARCHIVE_LOG_PREFIX = 'log-'
+const ARCHIVE_PERFORMANCES_FILE = 'musichub-performances.json'
 
 const actions:PluginAction [] = [
   {
@@ -117,6 +121,34 @@ const mpmExpectPerformance:MpmExpect = {
   "requires": ["musicodes.player"],
   "like": "{{guid}}",
   "button": "{{guid}}"
+}
+
+
+function replaceVariables(data:any, variables:any, name?:string) {
+    if (!name)
+        name = '';
+    if (Array.isArray(data) || typeof(data)=='object') {
+        for (var key in data) {
+            var value = data[key];
+            if (typeof(value)=='string') {
+                for (var name in variables) {
+                    if (value=='{{'+name+'}}') {
+                        value =  variables[name];
+                        break;
+                    }
+                    value = value.replace('{{'+name+'}}', variables[name]);
+                }
+                if (data[key]!=value) {
+                    //console.log('replace '+data[key]+' -> '+value);
+                }
+                data[key] = value;
+            } else {
+                replaceVariables(value, variables, name+'.'+key);
+            }
+        }
+    } else {
+        //console.log('ignore '+name+' - '+typeof(data));
+    }
 }
 
 export class ClimbappPlugin extends PluginProvider {
@@ -526,13 +558,13 @@ export class ClimbappPlugin extends PluginProvider {
           reject(err)
           return
         }
-        let outputfile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/log-'+guid+'.json'
+        let outputfile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/'+ARCHIVE_LOG_PREFIX+guid+'.json'
         fs.access(outputfile, (err) => {
-          if (skipIfExists && err) {
+          if (skipIfExists && !err) {
             console.log(`archive log file already exists: ${outputfile}`)
             resolve()
           } else {
-            let flag = skipIfExists ? 'x' : 'w'
+            let flag = skipIfExists ? 'wx' : 'w'
             console.log(`write archive empty log file to ${outputfile}`)
             fs.writeFile(outputfile, data, {encoding:'utf8', flag:flag}, (err) => {
               if(err) {
@@ -556,15 +588,104 @@ export class ClimbappPlugin extends PluginProvider {
       }
       return setRawPerformanceIntegrationSetting(perfint.id, perfint.pluginid, perfint.performanceid, SETTING_ARCHIVE, include ? '1' : '0')
         .then(() => {
-          // TODO - update files
-          if (include) {
-            resolve({message:`Included in archive`})
-          } else {
-            resolve({message:`Excluded from archive`})
-          }
+          return getRawPerformanceIntegrationsForSetting(perfint.pluginid, SETTING_ARCHIVE, '1')
+          .then((perfints) => { 
+            console.log(`found ${perfints.length} perfints for climb archive`)
+            let performanceps:Promise<Performance>[] = perfints.map((pi) => getRawPerformance(pi.performanceid))
+            return Promise.all(performanceps)
+            .then(performances => {
+              // log files?!
+              let logps:Promise<void>[] = perfints.map((perfint) => this.archiveWriteEmptyLog(perfint.guid, true))
+              return Promise.all(logps)
+              .then(() => {
+                // update performances file
+                let templatefile = getPluginDir(PLUGIN_CODE) + '/archive-empty.json'
+                fs.readFile(templatefile, 'utf8', (err, templatedata) => {
+                  if(err) {
+                    reject(err)
+                    return
+                  }
+                  let template = JSON.parse(templatedata)
+                  let perftfile = getPluginDir(PLUGIN_CODE) + '/archive-performance.json'
+                  fs.readFile(perftfile, 'utf8', (err, perftdata) => {
+                    if(err) {
+                      reject(err)
+                      return
+                    }
+                    let perstfile = getPluginDir(PLUGIN_CODE) + '/archive-person.json'
+                    fs.readFile(perstfile, 'utf8', (err, perstdata) => {
+                      if(err) {
+                        reject(err)
+                        return
+                      }
+                      template['annal:entity_list'] = []
+                      // TODO performances & performers...
+                      for (let i=0; i<perfints.length; i++) {
+                        let perfint = perfints[i]
+                        let performance = performances[i]
+                        let vars = {
+                          performanceid: perfint.guid,
+                          performancetitle: performance.title,
+                          systemid: perfint.guid,
+                          datetime: performance.date+'T'+performance.time+(performance.timezone ? performance.timezone : 'Z'),
+                          description: performance.description,
+                          performerid: perfint.guid+'-performer-1',
+                          personid: perfint.guid+'-performer-1',
+                          persontitle: performance.performer_title,
+                          bio: performance.performer_bio
+                        }
+                        let performanceout = JSON.parse(perftdata)
+                        let performerout = JSON.parse(perstdata)
+                        replaceVariables(performanceout, vars)
+                        replaceVariables(performerout, vars)
+                        template['annal:entity_list'].push(performanceout)
+                        template['annal:entity_list'].push(performerout)
+                      }
+                      let perfsofile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/'+ARCHIVE_PERFORMANCES_FILE
+                      console.log(`write performances file to ${perfsofile}`)
+                      let perfso = JSON.stringify(template, null, 2)
+                      fs.writeFile(perfsofile, perfso, 'utf8', (err) => {
+                        if(err) {
+                          reject(err)
+                          return
+                        }
+                        // URLs file
+                        let urlstfile = getPluginDir(PLUGIN_CODE) + '/archive-urls.json'
+                        fs.readFile(urlstfile, 'utf8', (err, urlsdata) => {
+                          if(err) {
+                            reject(err)
+                            return
+                          }
+                          let urls = JSON.parse(urlsdata)
+                          urls.push(ARCHIVE_URLS_PREFIX+ARCHIVE_PERFORMANCES_FILE)
+                          for (let perfint of perfints) {
+                            urls.push(ARCHIVE_URLS_PREFIX+ARCHIVE_LOG_PREFIX+perfint.guid+'.json')
+                          }
+                          let urlsofile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/urls.json'
+                          console.log(`write urls file to ${urlsofile}`)
+                          let urlso = JSON.stringify(urls, null, 2)
+                          fs.writeFile(urlsofile, urlso, 'utf8', (err) => {
+                            if(err) {
+                              reject(err)
+                              return
+                            }
+                            if (include) {
+                              resolve({message:`Included in archive`})
+                            } else {
+                              resolve({message:`Excluded from archive`})
+                            }
+                          })
+                        })
+                      })
+                    })
+                  })
+                })
+              })
+            })
+          })
         })
     })
-    .catch((err) => resolve({message:'Error getting integration state', error: err}))
+    .catch((err) => { console.log(err); resolve({message:'Error getting integration state', error: err}) })
   }
   archiveResetLog(resolve, reject):void {
     this.init()
