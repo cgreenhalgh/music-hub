@@ -3,7 +3,7 @@ import * as fs from 'fs'
 
 import { Work, Performance, Download } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
-  getPerformanceIntegration, getRawRevLinkedPerformanceId } from './db'
+  getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings } from './db'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 import { Capability, hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -170,6 +170,28 @@ router.get('/performance/:performanceid/integrations', (req, res) => {
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(perfints))
   })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// GET performance recordings
+router.get('/performance/:performanceid/recordings', (req, res) => {
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    console.log(`get /performance/${req.params.performanceid}/recordings - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  //console.log(`get work ${workid}`)
+  getPerformance(req.user, performanceid)
+  .then(performance => 
+    getPerformanceRecordings(req.user, performance, performance.work)
+    .then((recordings) => {
+      res.setHeader('Content-type', 'application/json')
+      res.send(JSON.stringify(recordings))
+    })
+  )
   .catch((err) => {
     sendError(res, err)
   })

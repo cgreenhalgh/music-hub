@@ -38,6 +38,7 @@ export interface Performance {
   linked_performanceid:number
   linked_performance?:Performance
   rev_linked_performance?:Performance
+  recordings?:Recording[]
 }
 
 export enum Role {
@@ -58,7 +59,13 @@ export interface RoleAssignment {
 }
 
 export interface Recording {
-// TODO finish recording
+  id:number
+  workid:number
+  performanceid:number
+  relpath:string
+  mimetype:string
+  perspective?:string
+  start_time_offset:number
   ispublic:boolean
 }
 

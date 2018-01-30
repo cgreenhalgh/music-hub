@@ -102,10 +102,12 @@ Plan A: per-performance files; combined into one. With locking.
 Template files:
 - `archive-performance.json` - `{{performanceid}}`, `{{performancetitle}}`, `{{systemid}}`, `{{datetime}}`, `{{description}}`, `{{performerid}}` (person id)
 - `archive-person.json` - `{{personid}}`, `{{persontitle}}`, `{{bio}}`
-- `archive-recording.json` - replace `{{performanceid}}`, `{{performancetitle}}`, `{{recordingid}}`, `{{datetime}}`, `{{description}}`
+- `archive-recording.json` - replace `{{performanceid}}`, `{{performancetitle}}`, `{{recordingid}}`, `{{datetime}}`, `{{description}}`, `{{starttimeoffset}`
 - `archive-audio-clip.json` - replace `{{performanceid}}`, `{{performancetitle}}`, `{{recordingid}}`, `{{url}}`
 - `archive-urls.json` - initial urls (array)
 - `archive-empty.json` - 'empty' data file - add items to object's `annal:entity_list` array. 
+
+Note, archive will probably now need to handle recording coll:startTimeOffset to fix recording time. Unless we read the real performance start time from the processed log?!
 
 ## Data and Access Model
 
@@ -251,3 +253,4 @@ Initially basic authentication. (order of priority)
 
 (9) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/download/<DOWNLOAD>` -> integration-specific download (e.g. MPM file?)
 
+`GET /api/1/performance/<PERFORMANCE>/recordings` -> array of recordings

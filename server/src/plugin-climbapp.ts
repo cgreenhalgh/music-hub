@@ -5,7 +5,9 @@ import * as fs from 'fs'
 import { PluginProvider, registerPlugin, getPluginDir, getMountDir } from './plugins'
 import { PerformanceIntegration, Performance, PluginAction, PluginActionResponse } from './types'
 import { getRawPerformanceIntegration, getRawPerformance, getRawPluginSetting, getRawRevLinkedPerformanceId, getRawPerformanceIntegration2, 
-    getRawPerformanceIntegrationSetting, setRawPerformanceIntegrationSetting, getRawPerformanceIntegrationsForSetting } from './db'
+    getRawPerformanceIntegrationSetting, setRawPerformanceIntegrationSetting, getRawPerformanceIntegrationsForSetting,
+    getRawRecordings } from './db'
+import * as moment from 'moment'
 
 const PLUGIN_CODE = 'climbapp'
 const REDIS_LIST = "redis-list"
@@ -18,6 +20,7 @@ const ARCHIVE_INCLUDE = "archive-include"
 const ARCHIVE_EXCLUDE = "archive-exclude"
 const ARCHIVE_RESET_LOG = 'archive-reset-log'
 const APPURL_SETTING = 'appurl'
+const PUBLICRECORDINGURL_SETTING = 'publicrecordingurl'
 const LOGPROCAPIURL_SETTING = 'logprocapiurl'
 const REDISHOST_SETTING = 'redishost'
 const MOUNT_ARCHIVE = 'archive'
@@ -580,6 +583,7 @@ export class ClimbappPlugin extends PluginProvider {
   }
   archiveUpdate(include:boolean, resolve, reject):void {
     this.init()
+    let publicrecordingurl = ''
     getRawPerformanceIntegration(this.perfint.id)
     .then((perfint) => {
       if (!perfint.guid) {
@@ -594,10 +598,18 @@ export class ClimbappPlugin extends PluginProvider {
             let performanceps:Promise<Performance>[] = perfints.map((pi) => getRawPerformance(pi.performanceid))
             return Promise.all(performanceps)
             .then(performances => {
+              // recordings
+              let recps:Promise<void>[] = performances.map((performance) => getRawRecordings(performance.id).then(recs => { performance.recordings = recs }) )
               // log files?!
               let logps:Promise<void>[] = perfints.map((perfint) => this.archiveWriteEmptyLog(perfint.guid, true))
               return Promise.all(logps)
-              .then(() => {
+              .then( () => Promise.all(recps) )
+              .then( () => getRawPluginSetting(this.perfint.pluginid, PUBLICRECORDINGURL_SETTING) )
+              .then( (url) => { if (url) {
+                  publicrecordingurl = url 
+                 } else { console.log(`Warning: publicrecordingurl not set on climb plugin`) }
+               })
+              .then( () => {
                 // update performances file
                 let templatefile = getPluginDir(PLUGIN_CODE) + '/archive-empty.json'
                 fs.readFile(templatefile, 'utf8', (err, templatedata) => {
@@ -618,21 +630,39 @@ export class ClimbappPlugin extends PluginProvider {
                         reject(err)
                         return
                       }
+                    // <--
+                    let rectfile = getPluginDir(PLUGIN_CODE) + '/archive-recording.json'
+                    fs.readFile(rectfile, 'utf8', (err, rectdata) => {
+                      if(err) {
+                        reject(err)
+                        return
+                      }
+                    // <--
+                    let filetfile = getPluginDir(PLUGIN_CODE) + '/archive-audio-clip.json'
+                    fs.readFile(filetfile, 'utf8', (err, filetdata) => {
+                      if(err) {
+                        reject(err)
+                        return
+                      }
                       template['annal:entity_list'] = []
-                      // TODO performances & performers...
+                      // performances & performers...
                       for (let i=0; i<perfints.length; i++) {
                         let perfint = perfints[i]
                         let performance = performances[i]
+                        let datetimestring = performance.date+'T'+performance.time+(performance.timezone ? performance.timezone : 'Z')
                         let vars = {
                           performanceid: perfint.guid,
                           performancetitle: performance.title,
                           systemid: perfint.guid,
-                          datetime: performance.date+'T'+performance.time+(performance.timezone ? performance.timezone : 'Z'),
+                          datetime: datetimestring,
                           description: performance.description,
                           performerid: perfint.guid+'-performer-1',
                           personid: perfint.guid+'-performer-1',
                           persontitle: performance.performer_title,
-                          bio: performance.performer_bio
+                          bio: performance.performer_bio,
+                          recordingid: null,
+                          url: null,
+                          starttimeoffset: 0
                         }
                         let performanceout = JSON.parse(perftdata)
                         let performerout = JSON.parse(perstdata)
@@ -640,6 +670,32 @@ export class ClimbappPlugin extends PluginProvider {
                         replaceVariables(performerout, vars)
                         template['annal:entity_list'].push(performanceout)
                         template['annal:entity_list'].push(performerout)
+                        // TODO take real performance start time from processed log to use for recording?!
+                        // recordings and clips
+                        for (let r=0; r<performance.recordings.length; r++) {
+                          let recording = performance.recordings[r]
+                          if (!recording.ispublic)
+                            continue
+                          vars.recordingid = recording.perspective
+                          vars.starttimeoffset = recording.start_time_offset
+                          try {
+                            let mtime = moment(datetimestring)
+                            console.log(`performance ${performance.id} at ${datetimestring} = ${mtime.toDate()} recording ${recording.perspective}, offset ${recording.start_time_offset}`) 
+                            vars.datetime = new Date(mtime.toDate().getTime()-1000*recording.start_time_offset).toISOString()
+                          } catch (err) {
+                            console.log(`error mapping recordinging time from ${datetimestring}: ${err.message}`)
+                            vars.datetime = null
+                          }
+                          // full path
+                          let url = publicrecordingurl+recording.relpath
+                          vars.url = url
+                          let recordingout = JSON.parse(rectdata)
+                          replaceVariables(recordingout, vars)
+                          template['annal:entity_list'].push(recordingout)
+                          let fileout = JSON.parse(filetdata)
+                          replaceVariables(fileout, vars)
+                          template['annal:entity_list'].push(fileout)
+                        }
                       }
                       let perfsofile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/'+ARCHIVE_PERFORMANCES_FILE
                       console.log(`write performances file to ${perfsofile}`)
@@ -677,6 +733,10 @@ export class ClimbappPlugin extends PluginProvider {
                           })
                         })
                       })
+                    })
+                    // <--
+                    })
+                    // <--
                     })
                   })
                 })

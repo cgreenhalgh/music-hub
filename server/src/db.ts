@@ -1,6 +1,6 @@
 // database
 import * as mysql from 'mysql'
-import { Account, RoleAssignment, Role, Work, Performance, Plugin, PluginSetting, PerformanceIntegration } from './types'
+import { Account, RoleAssignment, Role, Work, Performance, Plugin, PluginSetting, PerformanceIntegration, Recording } from './types'
 import { Capability, hasCapability } from './access'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 
@@ -346,6 +346,80 @@ export function getRawRevLinkedPerformanceId(performance:Performance) : Promise<
     
   })
 }
+function mapRecording(result:any) : Recording {
+  if (!result)
+    return null
+  let ispublic = result.public
+  delete result.public
+  let rec:Recording = result as Recording
+  rec.ispublic = bit2boolean(ispublic)
+  return rec
+}
+export function getPerformanceRecordings(account:Account, performance:Performance, work:Work) : Promise<Recording[]> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `recording` WHERE `performanceid` = ?'
+      let params = [performance.id]
+      con.query(query, params, (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getRecordings select: ${err.message}`)
+            reject(err)
+            return
+          }
+          con.release()
+          let recs:Recording[] = results.map((r) => mapRecording(r))
+          let accessps:Promise<boolean>[] = recs.map((rec) => hasCapability(account, Capability.ViewRecording, work, performance, null, rec))
+          Promise.all(accessps).then((accesses) => {
+            let frecs:Recording[] = []
+            for (let i in recs) {
+              if (accesses[i]) {
+                frecs.push(recs[i])
+              }
+            }
+            resolve(frecs)
+          })
+          .catch((err) => {
+            console.log(`Error checking access to recordings: ${err.message}`, err)
+            reject(err)
+          })
+      })
+    })
+    
+  })
+}
+export function getRawRecordings(performanceid:number) : Promise<Recording[]> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `recording` WHERE `performanceid` = ?'
+      let params = [performanceid]
+      con.query(query, params, (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getRawRecordings select: ${err.message}`)
+            reject(err)
+            return
+          }
+          con.release()
+          let recs:Recording[] = results.map((r) => mapRecording(r))
+          resolve(recs)
+      })
+    })
+  })
+}
+
 
 function mapPerformanceIntegration(result:any) : PerformanceIntegration {
   if (!result)

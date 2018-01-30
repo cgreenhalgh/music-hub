@@ -24,6 +24,7 @@
 	"mo:records": "Performance/{{performanceid}}",
 	"prov:hadMember_repeat": [],
 	"prov:startedAtTime": "{{datetime}}",
+	"coll:startTimeOffset": "{{starttimeoffset}}",
 	"rdfs:comment": "{{description}}",
 	"rdfs:label": "Recording of {{recordingid}} from {{performancetitle}}"
 }

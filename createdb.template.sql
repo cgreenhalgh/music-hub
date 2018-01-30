@@ -60,20 +60,36 @@ CREATE TABLE musichub.performance (
 	FOREIGN KEY (linked_performanceid) REFERENCES musichub.performance(id)
 );
 
--- TODO integrations
--- TODO audio/video recordings
+-- audio/video recordings
+CREATE TABLE musichub.recording (
+	id smallint unsigned not null auto_increment, 
+	workid smallint unsigned not null,
+	performanceid SMALLINT UNSIGNED not null,
+	relpath VARCHAR(200) NOT NULL,
+	mimetype VARCHAR(100) NOT NULL,
+	perspective VARCHAR(100),
+	start_time_offset FLOAT(10,3) NOT NULL DEFAULT 0,
+	public TINYINT NOT NULL DEFAULT 0,
+	PRIMARY KEY (id),
+	FOREIGN KEY (workid) REFERENCES musichub.work(id),
+	FOREIGN KEY (performanceid) REFERENCES musichub.performance(id)
+);
+
 -- TODO log files
 
 -- Climb! all your bass performance 1
 INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
-  VALUES (1, 1, 'Climb! at All Your Bass', 'Anne Veinberg', 'Anne Veinberg ...', 'Royal Concert Hall', 'Nottingham ','2018-01-19', '18:30:00', '+0:00', 0, 'CONFIRMED');
+  VALUES (1, 1, 'Climb! at All Your Bass', 'Anne Veinberg', 'Anne Veinberg ...', 'Royal Concert Hall', 'Nottingham ','2018-01-19', '18:30:00', '+00:00', 0, 'CONFIRMED');
 
 UPDATE musichub.performance SET performer_bio = '<p><b>Anne Veinberg</b> is an Australian pianist based in the Netherlands. Anne is passionate about music of and for today. She regularly collaborates with composers, actors and technologists to develop new works and musical experiences. Anne is a member of Ensemble Scala for microtonal music, of Apituley’s Locomotive Band for music theatre productions and of the live coding and piano duo Off&lt;&gt;zz. In 2017, Felipe Ignacio Noriega and Anne started developing the CodeKlavier which is a system that enables a pianist to live code through playing the piano. </p><p>Through the docARTES program, Anne is a doctoral candidate at Leiden University. Her research focuses on the intersection and interaction of pianistic and live coding performance practices. At home she practises on a Yamaha grand piano, kindly on loan from the Dutch Musical Instruments Foundation. The piano is part of the collection ‘Willem G. Vogelaar’.</p>' WHERE id = 1;
 
 INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status, linked_performanceid )
-  VALUES (2, 1, 'Climb! at All Your Bass (2)', 'Zubin Kanga', 'Zubin Kanga ...', 'Royal Concert Hall', 'Nottingham', '2018-01-19', '19:00:00', '+0:00', 0, 'CONFIRMED', 1);
+  VALUES (2, 1, 'Climb! at All Your Bass (2)', 'Zubin Kanga', 'Zubin Kanga ...', 'Royal Concert Hall', 'Nottingham', '2018-01-19', '19:00:00', '+00:00', 0, 'CONFIRMED', 1);
 
 UPDATE musichub.performance SET performer_bio = '<p><b>Zubin Kanga</b> is a pianist, composer, improviser and technologist. He has collaborated with many of the world’s leading composers including Thomas Adès, Michael Finnissy, George Benjamin and Steve Reich and premiered more than 90 new works. He is a member of Ensemble Offspring and the Marsyas Trio, and has performed piano duos with Rolf Hind and Thomas Adès. His solo work in recent years has focused on new models of interaction between a live musician and new technologies, using film, AI, motion capture and virtual reality.</p><p>Zubin has performed at many international festivals including the BBC Proms, Huddersfield Contemporary Music Festival (UK) Melbourne Festival (Australia), Manifeste Festival (France) and Borealis Festival (Norway). He has performed several concerti under the composer’s baton, including with Thomas Adès and the Melbourne Symphony Orchestra and with Beat Furrer and the London Sinfonietta.</p><p>A Masters and PhD graduate of the Royal Academy of Music, London, Zubin recently finished a post as post-doctoral researcher at the University of Nice and IRCAM, Paris and is currently the Leverhulme Research Fellow at Royal Holloway, University of London.</p><p><a href="http://www.zubinkanga.com">www.zubinkanga.com</a></p>' WHERE id = 2;
+
+INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (1, 1, 1, 'climb-allyourbass-anne.mp3', 'audio/mpeg', 'mix', 2.5, 1);
+INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (2, 1, 2, 'climb-allyourbass-zubin.mp3', 'audio/mpeg', 'mix', 5.5, 1);
 
 -- role assignments
 CREATE TABLE musichub.role (
@@ -135,12 +151,14 @@ INSERT INTO musichub.plugin (id, title, code)
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'appurl', 'http://music-mrl.nott.ac.uk/2/muzivisual/');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'logprocapiurl', 'http://uploader:{{env.LOGPROC_PASSWORD}}@music-mrl.nott.ac.uk/1/logproc/api');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'redishost', 'music-mrl.nott.ac.uk');
+INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (1, 'publicrecordingurl', 'http://music-mrl.nott.ac.uk/1/recordings/');
 
 INSERT INTO musichub.plugin (id, title, code) 
   VALUES(2, 'Climb! app on localhost', 'climbapp');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (2, 'appurl', 'http://localhost:8080/2/muzivisual/');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (2, 'logprocapiurl', 'http://uploader:{{env.LOGPROC_PASSWORD}}@localhost:8080/1/logproc/api');
 INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (2, 'redishost', 'localhost');
+INSERT INTO musichub.plugin_setting (pluginid, name, value) VALUES (2, 'publicrecordingurl', 'http://localhost:8080/1/recordings/');
 
 
 
@@ -177,9 +195,9 @@ INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, 
 
 -- FAST All Hands Demo
 INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
-  VALUES (3, 1, 'Climb! at FAST AHM 2018 (1)', 'No-one in particular', 'Something interesting to read...', 'The Oval', 'London','2017-12-20', '13:00:00', '+0:00', 0, 'CONFIRMED');
+  VALUES (3, 1, 'Climb! at FAST AHM 2018 (1)', 'No-one in particular', 'Something interesting to read...', 'The Oval', 'London','2017-12-20', '13:00:00', '+00:00', 0, 'CONFIRMED');
 INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
-  VALUES (4, 1, 'Climb! at FAST AHM 2018 (2)', 'No-one in particular', 'Something interesting to read...', 'The Oval', 'London','2017-12-20', '13:30:00', '+0:00', 0, 'CONFIRMED');
+  VALUES (4, 1, 'Climb! at FAST AHM 2018 (2)', 'No-one in particular', 'Something interesting to read...', 'The Oval', 'London','2017-12-20', '13:30:00', '+00:00', 0, 'CONFIRMED');
 
 INSERT INTO musichub.account (id, email, passwordhash, nickname, description)
   VALUES ( 2, 'adrian', 'HUBADMIN_PASSWORD', 'Adrian', 'Adrians account' );
@@ -197,13 +215,13 @@ INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'p
 -- Audio Mostly 2017 legacy
 INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
   VALUES (5, 1, 'AM2017 test', 'Maria Kallionpaa', '<div><b>Dr. Maria Kallionp&auml;&auml; (1981)</b> is an internationally active composer and pianist. She earned her PhD in composition at the University of Oxford in 2015. Kallionp&auml;&auml; won the first prize of the OUPHIL composition competition in 2013. She has graduated from the Royal Academy of Music (2009) and Universit&auml;t f&uuml;r Musik and Darstellende Kunst Wien (2010) and has also studied composition and piano at Sibelius Academy and Universit&auml;t Mozarteum Salzburg. Her works have been performed at Musikverein Wien, Philharmonie Luxembourg, and Sibiu Philharmonia. In 2011 Kallionp&auml;&auml; was a commissioned composer of the Turku European Culture Capital and a finalist of the Tenso European Chamber Choir Composition Competition. Kallionp&auml;&auml; has performed at numerous music festivals including Rainy Days Festival at Philharmonie Luxembourg, Musica Nova (Helsinki), Spitalfields Festival (London), and Neue Musik von Thuringen. In 2016 her music was performed at the Florida International Toy Piano Festival.</div>', 
-    'Audio Mostly', 'London','2017-08-25', '14:00:00', '+0:00', 0, 'CONFIRMED');
+    'Audio Mostly', 'London','2017-08-25', '14:00:00', '+00:00', 0, 'CONFIRMED');
 INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
   VALUES (6, 1, 'AM2017 dress rehearsal', 'Maria Kallionpaa', '<div><b>Dr. Maria Kallionp&auml;&auml; (1981)</b> is an internationally active composer and pianist. She earned her PhD in composition at the University of Oxford in 2015. Kallionp&auml;&auml; won the first prize of the OUPHIL composition competition in 2013. She has graduated from the Royal Academy of Music (2009) and Universit&auml;t f&uuml;r Musik and Darstellende Kunst Wien (2010) and has also studied composition and piano at Sibelius Academy and Universit&auml;t Mozarteum Salzburg. Her works have been performed at Musikverein Wien, Philharmonie Luxembourg, and Sibiu Philharmonia. In 2011 Kallionp&auml;&auml; was a commissioned composer of the Turku European Culture Capital and a finalist of the Tenso European Chamber Choir Composition Competition. Kallionp&auml;&auml; has performed at numerous music festivals including Rainy Days Festival at Philharmonie Luxembourg, Musica Nova (Helsinki), Spitalfields Festival (London), and Neue Musik von Thuringen. In 2016 her music was performed at the Florida International Toy Piano Festival.</div>', 
-    'Audio Mostly', 'London','2017-08-25', '17:00:00', '+0:00', 0, 'CONFIRMED');
+    'Audio Mostly', 'London','2017-08-25', '17:00:00', '+00:00', 0, 'CONFIRMED');
 INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
   VALUES (7, 1, 'AM2017', 'Maria Kallionpaa', '<div><b>Dr. Maria Kallionp&auml;&auml; (1981)</b> is an internationally active composer and pianist. She earned her PhD in composition at the University of Oxford in 2015. Kallionp&auml;&auml; won the first prize of the OUPHIL composition competition in 2013. She has graduated from the Royal Academy of Music (2009) and Universit&auml;t f&uuml;r Musik and Darstellende Kunst Wien (2010) and has also studied composition and piano at Sibelius Academy and Universit&auml;t Mozarteum Salzburg. Her works have been performed at Musikverein Wien, Philharmonie Luxembourg, and Sibiu Philharmonia. In 2011 Kallionp&auml;&auml; was a commissioned composer of the Turku European Culture Capital and a finalist of the Tenso European Chamber Choir Composition Competition. Kallionp&auml;&auml; has performed at numerous music festivals including Rainy Days Festival at Philharmonie Luxembourg, Musica Nova (Helsinki), Spitalfields Festival (London), and Neue Musik von Thuringen. In 2016 her music was performed at the Florida International Toy Piano Festival.</div>', 
-    'Audio Mostly', 'London','2017-08-25', '18:00:00', '+0:00', 0, 'CONFIRMED');
+    'Audio Mostly', 'London','2017-08-25', '18:00:00', '+00:00', 0, 'CONFIRMED');
 
 INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (5, 1, 1, 'de3250be-9b54-4a7b-9675-fd145fc2561c');
 INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (6, 1, 1, 'e888ea0f-8c81-48a8-8462-bc98dd04f495');
@@ -212,3 +230,6 @@ INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, 
 INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 5);
 INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 6);
 INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 7);
+
+-- fix
+update performance set timezone = '+00:00';
