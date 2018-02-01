@@ -26,7 +26,8 @@ const REDISHOST_SETTING = 'redishost'
 const MOUNT_ARCHIVE = 'archive'
 const SETTING_ARCHIVE = 'archive'
 const ARCHIVE_URLS_PREFIX = 'assets/data/'
-const ARCHIVE_LOG_PREFIX = 'log-'
+const ARCHIVE_LOG_PREFIX = 'performance-'
+const ARCHIVE_LOG_SUFFIX = '-annalist.json'
 const ARCHIVE_PERFORMANCES_FILE = 'musichub-performances.json'
 
 const actions:PluginAction [] = [
@@ -561,7 +562,7 @@ export class ClimbappPlugin extends PluginProvider {
           reject(err)
           return
         }
-        let outputfile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/'+ARCHIVE_LOG_PREFIX+guid+'.json'
+        let outputfile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/'+ARCHIVE_LOG_PREFIX+guid+ARCHIVE_LOG_SUFFIX
         fs.access(outputfile, (err) => {
           if (skipIfExists && !err) {
             console.log(`archive log file already exists: ${outputfile}`)
@@ -715,7 +716,7 @@ export class ClimbappPlugin extends PluginProvider {
                           let urls = JSON.parse(urlsdata)
                           urls.push(ARCHIVE_URLS_PREFIX+ARCHIVE_PERFORMANCES_FILE)
                           for (let perfint of perfints) {
-                            urls.push(ARCHIVE_URLS_PREFIX+ARCHIVE_LOG_PREFIX+perfint.guid+'.json')
+                            urls.push(ARCHIVE_URLS_PREFIX+ARCHIVE_LOG_PREFIX+perfint.guid+ARCHIVE_LOG_SUFFIX)
                           }
                           let urlsofile = getMountDir(PLUGIN_CODE, MOUNT_ARCHIVE)+'/urls.json'
                           console.log(`write urls file to ${urlsofile}`)
