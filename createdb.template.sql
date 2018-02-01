@@ -90,6 +90,8 @@ UPDATE musichub.performance SET performer_bio = '<p><b>Zubin Kanga</b> is a pian
 
 INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (1, 1, 1, 'Climb_AYB_Anne-roughmix.mp3', 'audio/mpeg', 'roughmix', 2.5, 1);
 INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (2, 1, 2, 'Climb_AYB_Zubin-roughmix.mp3', 'audio/mpeg', 'roughmix', 1, 1);
+INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (3, 1, 1, 'Climb_AYB_Anne-front.mp4', 'video/mp4', 'front', 2.5, 1);
+INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (4, 1, 2, 'Climb_AYB_Zubin-front.mp4', 'video/mp4', 'front', 1, 1);
 
 -- role assignments
 CREATE TABLE musichub.role (
@@ -232,4 +234,4 @@ INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'p
 INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 7);
 
 -- fix
-update performance set timezone = '+00:00';
+-- update performance set timezone = '+00:00';
