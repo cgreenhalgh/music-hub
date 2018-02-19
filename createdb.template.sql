@@ -248,5 +248,8 @@ INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, 
 INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 8);
 INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 9);
 
+UPDATE musichub.performance SET performer_title = _latin1"Maria Kallionpää" WHERE id = 8;
+UPDATE musichub.performance SET performer_title = _latin1"Maria Kallionpää" WHERE id = 9;
+
 -- fix
 -- update performance set timezone = '+00:00';

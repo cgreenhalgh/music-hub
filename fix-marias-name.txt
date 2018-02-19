@@ -1,0 +1,3 @@
+UPDATE musichub.performance SET performer_title = _latin1"Maria Kallionp‰‰" WHERE id = 9;
+UPDATE musichub.performance SET performer_title = _latin1"Maria Kallionp‰‰" WHERE id = 8;
+
