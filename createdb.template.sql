@@ -233,5 +233,20 @@ INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'p
 INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 6);
 INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 7);
 
+-- Guildhall 2018-02-21
+
+INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status )
+  VALUES (8, 1, 'Climb! at RCC 2018 (1)', 'Maria Kallionpaa', '<div><b>Dr. Maria Kallionp&auml;&auml; (1981)</b> is an internationally active composer and pianist. She earned her PhD in composition at the University of Oxford in 2015. Kallionp&auml;&auml; won the first prize of the OUPHIL composition competition in 2013. She has graduated from the Royal Academy of Music (2009) and Universit&auml;t f&uuml;r Musik and Darstellende Kunst Wien (2010) and has also studied composition and piano at Sibelius Academy and Universit&auml;t Mozarteum Salzburg. Her works have been performed at Musikverein Wien, Philharmonie Luxembourg, and Sibiu Philharmonia. In 2011 Kallionp&auml;&auml; was a commissioned composer of the Turku European Culture Capital and a finalist of the Tenso European Chamber Choir Composition Competition. Kallionp&auml;&auml; has performed at numerous music festivals including Rainy Days Festival at Philharmonie Luxembourg, Musica Nova (Helsinki), Spitalfields Festival (London), and Neue Musik von Thuringen. In 2016 her music was performed at the Florida International Toy Piano Festival.</div>', 
+    'Guildhall', 'London','2018-02-21', '14:00:00', '+00:00', 0, 'CONFIRMED');
+INSERT INTO musichub.performance (id, workid, title, performer_title, performer_bio, venue_title, location, date, time, timezone, public, status, linked_performanceid )
+  VALUES (9, 1, 'Climb! at RCC 2018 (2)', 'Maria Kallionpaa', '', 
+    'Guildhall', 'London','2018-02-21', '14:30:00', '+00:00', 0, 'CONFIRMED', 8);
+
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (8, 1, 1, '20180221-rcc-1');
+INSERT INTO musichub.performance_integration (performanceid, pluginid, enabled, guid) VALUES (9, 1, 1, '20180221-rcc-2');
+
+INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 8);
+INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'performancemanager', 1, 9);
+
 -- fix
 -- update performance set timezone = '+00:00';
