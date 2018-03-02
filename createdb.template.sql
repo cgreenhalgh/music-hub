@@ -251,5 +251,10 @@ INSERT INTO musichub.role (accountid, role, workid, performanceid) VALUES (2, 'p
 UPDATE musichub.performance SET performer_title = _latin1"Maria Kallionpää" WHERE id = 8;
 UPDATE musichub.performance SET performer_title = _latin1"Maria Kallionpää" WHERE id = 9;
 
+INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (5, 1, 8, 'Climb_RCC2018_1-front.mp3', 'audio/mpeg', 'wide-audio', 1.5, 1);
+INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (6, 1, 9, 'Climb_RCC2018_2-front.mp3', 'audio/mpeg', 'wide-audio', 1, 1);
+INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (7, 1, 8, 'Climb_RCC2018_1-front-480.mp4', 'video/mp4', 'wide', 1.5, 1);
+INSERT INTO musichub.recording (id, workid, performanceid, relpath, mimetype, perspective, start_time_offset, public ) VALUES (8, 1, 9, 'Climb_RCC2018_2-front-480.mp4', 'video/mp4', 'wide', 1, 1);
+
 -- fix
 -- update performance set timezone = '+00:00';
