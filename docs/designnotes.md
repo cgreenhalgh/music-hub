@@ -118,37 +118,37 @@ Authenticated access (username, password).
 Multiple _roles_ in relation to a work/performance:
 - `admin` - site admin, can create and manage accounts
 - `publisher` - can create new works on the site
-- `owner` - control of work
-- `performer` - can access supporting resources, e.g. for rehearsal
-- `performancemanager` - control of a performance
+- `owner` - (of work) control of work
+- `performer` - (of work) can access supporting resources, e.g. for rehearsal
+- `performancemanager` - (of performance) control of a performance
 - `public` - anyone (default role)
 
 System capabilities:
-- `create-account`
-- `edit-account`
-- `manage-account`, e.g. block
-- `view-account`
-- `crete-plugin`
-- `manage-plugin`
+- `create-account` (admin)
+- `edit-account` (admin or the account holder)
+- `manage-account`, e.g. block (admin)
+- `view-account` (anyone)
+- `create-plugin` (not yet defined/used)
+- `manage-plugin` (not yet defined/used)
 
 Capabilities in relation to a work:
-- `create-work`
-- `edit-work`
-- `view-work`
-- `download-work`
-- `edit-roles-work`
-- `create-work-performance`
+- `create-work` (admin or publisher)
+- `edit-work` (owner)
+- `view-work` (anyone - for now - all works are public!)
+- `download-work` (owner, performer of work)
+- `edit-roles-work` (owner)
+- `create-work-performance` (owner; ?? performer ??) -> establishes performance manager (required unless owner)
 
 Capabilities in relation to a performance:
-- `edit-performance`
-- `view-performance`
-- `edit-roles-performance`
-- `create-recording`
-- `manage-performance-integration`
+- `edit-performance` (anyone if public, else work owner or performance manager)
+- `view-performance`  (anyone if public, else work owner or performance manager)
+- `edit-roles-performance` (owner of work)
+- `create-recording` (default: performance manager)
+- `manage-performance-integration` (default: performance manager)
 
 Capabilities in relation to a recording:
-- `edit-recording`
-- `view-recording`
+- `edit-recording` (default: performance manager)
+- `view-recording` (anyone if public, else performance manager)
 
 Multiple _performances_ of a work.
 
