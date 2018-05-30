@@ -2,7 +2,7 @@
 import * as mysql from 'mysql'
 import { Account, RoleAssignment, Role, Work, Performance, Plugin, PluginSetting, PerformanceIntegration, Recording } from './types'
 import { Capability, hasCapability } from './access'
-import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
+import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 
 let password = process.env['MUSICHUB_PASSWORD']
 if (!password || password.length==0) {
@@ -274,6 +274,113 @@ export function getPerformance(account:Account, performanceid:number) : Promise<
             })
           })
           .catch((err) => {
+            console.log(`Error checking access to performance ${performanceid} of work ${perf.workid}: ${err.message}`, err)
+            reject(err)
+          })
+      })
+    })
+    
+  })
+}
+export function putPerformance(account:Account, performanceid:number, performance:Performance) : Promise<void> {
+  return new Promise((resolve, reject) => {
+    // will update validate??
+    if (performance.id != performanceid) {
+      reject(new BadRequestError('id does not match for performance'))
+      return
+    }
+/*
+    // validate new value
+    if (!performance.title) {
+      reject(new BadRequestError('title required for performance'))
+      return
+    }
+    //description TEXT,
+    if (!performance.performer_title) {
+      reject(new BadRequestError('performer_title required for performance'))
+      return
+    }
+    if (!performance.performer_title) {
+      reject(new BadRequestError('performer_title required for performance'))
+      return
+    }
+    //performer_bio TEXT,
+    if (!performance.venue_title) {
+      reject(new BadRequestError('venue_title required for performance'))
+      return
+    }
+    if (!performance.location) {
+      reject(new BadRequestError('location required for performance'))
+      return
+    }
+    //date DATE,
+    //time TIME,
+    //timezone VARCHAR(20),
+    if (performance.public===null || performance.public===undefined) {
+      reject(new BadRequestError('public required for performance'))
+      return
+    }
+    if (!performance.status) {
+      reject(new BadRequestError('public required for performance'))
+      return
+    }
+*/
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      // check workid
+      let query = 'SELECT * FROM `performance` WHERE `id` = ?'
+      let params = [performanceid]
+      con.query(query, params, (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getPerformance select: ${err.message}`)
+            reject(err)
+            return
+          }
+          if (results.length==0) {
+            con.release()
+            reject(new NotFoundError(`performance ${performanceid} not found`))
+            return
+          }
+          let perf:Performance = mapPerformance(results[0])
+          getWork(account, perf.workid)
+          .then((work) => {
+            return hasCapability(account, Capability.EditPerformance, work, perf)
+            .then((access) => {
+              if (access) {
+                // UPDATE
+                let update = 'UPDATE `performance` SET `title` = ?, `description` = ?, '+
+                  '`performer_title` = ?, `performer_bio` = ?, `location` = ?, '+
+                  '`venue_title` = ?, `date` = ?, `time` = ?, `timezone` = ?, '+
+                  '`public` = ?, `status` = ?, `linked_performanceid` = ? '+
+                  ' WHERE `id` = ?'
+                let params = [performance.title, performance.description, 
+                    performance.performer_title, performance.performer_bio, performance.location,
+                    performance.venue_title, performance.date, performance.time, performance.timezone,
+                    performance.ispublic ? 1 : 0, performance.status, performance.linked_performanceid,
+                    performanceid]
+                con.query(update, params, (err) => {
+                  con.release()
+                  if (err) {
+                    console.log(`Error doing putPerformance update: ${err.message}`)
+                    reject(new BadRequestError(err.message))
+                    return
+                  }
+                  resolve()
+                })
+              } else {
+                con.release()
+                reject(new PermissionError(`performance ${performanceid} not editable by ${account.email}`))
+              }
+            })
+          })
+          .catch((err) => {
+            con.release()
             console.log(`Error checking access to performance ${performanceid} of work ${perf.workid}: ${err.message}`, err)
             reject(err)
           })

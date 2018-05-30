@@ -19,4 +19,11 @@ export class NotFoundError extends Error {
     Object.setPrototypeOf(this, NotFoundError.prototype);
   }
 }
+export class BadRequestError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, BadRequestError.prototype);
+  }
+}
 

@@ -109,6 +109,13 @@ export class ApiService {
   doIntegrationAction(performanceid:string, pluginid:string, actionid:string): Observable<PluginActionResponse> {
     return this.http.post<PluginActionResponse>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid)+'/'+encodeURIComponent(actionid), null, {headers:this.getHeaders()})
   }
+  putPerformance(performance:Performance): Observable<Performance> {
+    // selective... no cached values
+    let p:Performance = Object.assign({}, performance)
+    delete p.linked_performance
+    delete p.work
+    return this.http.put<Performance>(this.apiUrl+'/performance/'+encodeURIComponent(String(performance.id)), p, {headers: this.getHeaders()})
+  }
   getMessageForError(err):string {
     let error = 'Error making request to server'
     if (err.error instanceof Error) {

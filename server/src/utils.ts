@@ -1,4 +1,4 @@
-import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
+import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { Work } from './types'
 import { authenticate } from './db'
 
@@ -23,6 +23,10 @@ export function sendError(res, err:Error) {
   } else if (err instanceof NotFoundError) {
     // not found
     res.status(404)
+    res.send(err.message)
+  } else if (err instanceof BadRequestError) {
+    // not found
+    res.status(400)
     res.send(err.message)
   }
   else {

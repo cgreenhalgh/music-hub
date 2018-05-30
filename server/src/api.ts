@@ -3,8 +3,8 @@ import * as fs from 'fs'
 
 import { Work, Performance, Download } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
-  getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings } from './db'
-import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
+  getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance } from './db'
+import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { Capability, hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
 import { unauthorized, badrequest, sendError, getDownloadsDirForWork, crossDomainOptions, basicAuthentication } from './utils'
@@ -120,15 +120,7 @@ router.get('/work/:workid/downloads', (req, res) => {
     sendError(res, err)
   })
 })
-// GET performance
-router.get('/performance/:performanceid', (req, res) => {
-  var performanceid
-  try { performanceid = Number(req.params.performanceid) }
-  catch (err) {
-    console.log(`get /performance/${req.params.performanceid} - not a number`)
-    res.sendStatus(404)
-    return
-  }
+function returnPerformance(req, res, performanceid) {
   let ps:Performance[] = []
   //console.log(`get work ${workid}`)
   getPerformance(req.user, performanceid)
@@ -150,6 +142,32 @@ router.get('/performance/:performanceid', (req, res) => {
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(ps[0]))
    })
+  .catch((err) => {
+    sendError(res, err)
+  })
+}
+// GET performance
+router.get('/performance/:performanceid', (req, res) => {
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    console.log(`get /performance/${req.params.performanceid} - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  returnPerformance(req, res, performanceid)
+})
+// PUT performance
+router.put('/performance/:performanceid', (req, res) => {
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    console.log(`put /performance/${req.params.performanceid} - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  putPerformance(req.user, performanceid, req.body as Performance)
+  .then(() => returnPerformance(req, res, performanceid))
   .catch((err) => {
     sendError(res, err)
   })

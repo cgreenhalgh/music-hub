@@ -1,0 +1,43 @@
+<form [formGroup]="performanceForm" (ngSubmit)="onSubmit()">
+  <div style="margin-bottom: 1em">
+    <button type="button" (click)="revert()"
+            [disabled]="disabled" class="btn btn-info">Cancel</button>
+    <button type="submit"
+            [disabled]="performanceForm.pristine || disabled || !performanceForm.valid" class="btn btn-info">Save</button> &nbsp;
+  </div>
+  <div class="form-group">
+    <label class="center-block">Title:*</label>
+    <input class="form-control" formControlName="title">
+  </div>
+  <div class="form-group">
+    <label class="center-block">Description:</label>
+    <input class="form-control" formControlName="description">
+  </div>
+  <div class="form-group">
+    <label class="center-block">Performer:*</label>
+    <input class="form-control" formControlName="performer_title">
+  </div>
+  <div class="form-group">
+    <label class="center-block">Bio:</label>
+    <textarea class="form-control" formControlName="performer_bio"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="center-block">Venue:*</label>
+    <input class="form-control" formControlName="venue_title">
+  </div>
+  <div class="form-group">
+    <label class="center-block">Location:*</label>
+    <input class="form-control" formControlName="location">
+  </div>
+  <div class="form-group">
+    <label class="center-block">Status:*</label>
+    <select class="form-control" formControlName="status">
+      <option *ngFor="let status of statuses" [value]="status">{{status}}</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>
+      <input type="checkbox" autocomplete="off" formControlName="ispublic">Public
+    </label><!-- {{performanceForm.get('ispublic').value}} -->
+  </div>
+</form>

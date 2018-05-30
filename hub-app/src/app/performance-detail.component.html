@@ -4,12 +4,24 @@
     <div *ngIf="loading">Loading performance...</div>
     <div *ngIf="!!performance">
       <h2>Performance: {{performance.title}}</h2>
-      <p *ngIf="performance.work">Work: {{ performance.work.title }} ({{performance.work.year}})</p>
-      <p>Performer: {{performance.performer_title}}</p>
-      <p>Venue: {{performance.venue_title}}</p>
-      <p>Status: {{performance.status}}</p>
-      <p *ngIf="performance.linked_performance">Preceded by: {{performance.linked_performance.title}}, performed by {{performance.linked_performance.performer_title}}</p>
-      <p *ngIf="performance.rev_linked_performance">Followed by: {{performance.rev_linked_performance.title}}, performed by {{performance.rev_linked_performance.performer_title}}</p>
+      
+      <div *ngIf="editing || saving">
+        <div *ngIf="errorEdit" class="alert alert-danger">Error: {{errorEdit}}</div>
+        <hub-performance-form [performance]="editPerformance" (save)="save($event)" (cancel)="cancel()" [disabled]="saving"></hub-performance-form>
+      </div>
+      
+      <div *ngIf="!editing && !saving">
+        <div style="margin-bottom: 1em">
+          <button type="button" (click)="edit()"
+            [disabled]="false" class="btn btn-info">Edit</button>
+        </div>
+        <p *ngIf="performance.work">Work: {{ performance.work.title }} ({{performance.work.year}})</p>
+        <p>Performer: {{performance.performer_title}}</p>
+        <p>Venue: {{performance.venue_title}}</p>
+        <p>Status: {{performance.status}}</p>
+        <p *ngIf="performance.linked_performance">Preceded by: {{performance.linked_performance.title}}, performed by {{performance.linked_performance.performer_title}}</p>
+        <p *ngIf="performance.rev_linked_performance">Followed by: {{performance.rev_linked_performance.title}}, performed by {{performance.rev_linked_performance.performer_title}}</p>
+      </div>
     </div>
     <h3>Tools</h3>
     <div *ngIf="error2" class="alert alert-danger">Error: {{error}}</div>
