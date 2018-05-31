@@ -361,7 +361,8 @@ export function putPerformance(account:Account, performanceid:number, performanc
                   ' WHERE `id` = ?'
                 let params = [performance.title, performance.description, 
                     performance.performer_title, performance.performer_bio, performance.location,
-                    performance.venue_title, performance.date, performance.time, performance.timezone,
+                    performance.venue_title, (""==performance.date ? null : performance.date), 
+                    (""==performance.time ? null : performance.time), performance.timezone,
                     performance.ispublic ? 1 : 0, performance.status, performance.linked_performanceid,
                     performanceid]
                 con.query(update, params, (err) => {

@@ -121,6 +121,10 @@ export class ApiService {
     if (err.error instanceof Error) {
       // A client-side or network error occurred. Handle it accordingly.
       error = err.error.message
+    } else if (!!err.error) {
+      error = String(err.error)
+    } else if (err.message) {
+      error = err.message
     } else {
       error = `Server returned status ${err.status}`
     }

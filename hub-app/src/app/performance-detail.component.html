@@ -16,9 +16,10 @@
             [disabled]="false" class="btn btn-info">Edit</button>
         </div>
         <p *ngIf="performance.work">Work: {{ performance.work.title }} ({{performance.work.year}})</p>
-        <p>Performer: {{performance.performer_title}}</p>
-        <p>Venue: {{performance.venue_title}}</p>
-        <p>Status: {{performance.status}}</p>
+        <p>Performer: {{performance.performer_title}} - {{performance.performer_bio}}</p>
+        <p>Venue: {{performance.venue_title}}, in {{performance.location}}</p>
+        <p>Date: {{performance.date}} {{performance.time}} {{performance.timezone}}
+        <p>Status: {{performance.status}}, <span *ngIf="performance.public">public</span><span *ngIf="!performance.public">private</span></p> 
         <p *ngIf="performance.linked_performance">Preceded by: {{performance.linked_performance.title}}, performed by {{performance.linked_performance.performer_title}}</p>
         <p *ngIf="performance.rev_linked_performance">Followed by: {{performance.rev_linked_performance.title}}, performed by {{performance.rev_linked_performance.performer_title}}</p>
       </div>

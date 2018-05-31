@@ -65,7 +65,7 @@ export class PerformanceDetailComponent implements OnInit {
     this.saving = true
     this.api.putPerformance(p).subscribe(
       (res) => { this.performance = res; this.saving=false; },
-      (err) => { this.errorEdit = err.message; this.saving=false; this.editing=true; }
+      (err) => { this.errorEdit = this.api.getMessageForError(err); this.saving=false; this.editing=true; console.log('error', err) }
     )
   }
 }
