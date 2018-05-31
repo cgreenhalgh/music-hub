@@ -1,10 +1,10 @@
 import * as express from 'express'
 import * as fs from 'fs'
 
-import { Work, Performance, Download, Capability, Account, RoleAssignment } from './types'
+import { Work, Performance, Download, Capability, Account, RoleAssignment, Role } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
-  addPerformanceOfWork, getAccounts, addAccount, getPerformanceRoles, getWorkRoles } from './db'
+  addPerformanceOfWork, getAccounts, addAccount, getPerformanceRoles, getWorkRoles, setWorkAccountRole } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -453,6 +453,41 @@ router.get('/work/:workid/roles', (req, res) => {
   .then(ras => {
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(ras))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+router.put('/work/:workid/account/:accountid/role/:roleid', (req, res) => {
+  var workid
+  try { workid = Number(req.params.workid) }
+  catch (err) {
+    console.log(`workid ${req.params.workid} - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  var accountid
+  try { accountid = Number(req.params.accountid) }
+  catch (err) {
+    console.log(`accountid ${req.params.accountid} - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  var roleid = req.params.roleid
+  if (Role.Owner!=roleid && Role.Performer!=roleid) {
+    console.log('role '+roleid+' not valid for work')
+    res.sendStatus(400)
+    return
+  }
+  if (!req.body || typeof(req.body.grant) != 'boolean') {
+    console.log('put role body not {grant:boolean}', req.body)
+    res.sendStatus(400)
+    return
+  }
+  setWorkAccountRole(req.user, workid, accountid, roleid, req.body.grant as boolean)
+  .then((changed) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(changed))
   })
   .catch((err) => {
     sendError(res, err)

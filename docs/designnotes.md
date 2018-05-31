@@ -225,11 +225,11 @@ Web API.
 
 Initially basic authentication. (order of priority)
 
-`GET /api/1/account` -> account info.
+`GET /api/1/account` -> account info.(current user)
 
-(13) `GET /api/1/capability/<CAPABILITY>` -> true/false
-(13) `GET /api/1/work/<WORK>/capability/<CAPABILITY>` -> true/false
-(13) `GET /api/1/performance/<PERFORMANCE>/capability/<CAPABILITY>` -> true/false
+(13) `GET /api/1/capability/<CAPABILITY>` -> true/false (current user)
+(13) `GET /api/1/work/<WORK>/capability/<CAPABILITY>` -> true/false (current user)
+(13) `GET /api/1/performance/<PERFORMANCE>/capability/<CAPABILITY>` -> true/false (current user)
 (12) `GET /api/1/accounts` -> all accounts info.
 (14) `POST /api/1/accounts` -> return new id
 
@@ -243,7 +243,8 @@ Initially basic authentication. (order of priority)
 (11) `POST /api/1/work/<WORK>/performances` -> add new performance
 
 `GET /api/1/work/<WORK>/downloads` -> array of downloads
-(`GET /api/1/work/<WORK>/roles` -> array of RoleAssignments)
+`GET /api/1/work/<WORK>/roles` -> array of RoleAssignments
+`PUT /api/1/work/<WORK>/account/<ACCOUNT>/role/<ROLE>` - send {grant:true/false}
 
 `GET /downloads/<WORK>/<FILENAME>` -> download
 
@@ -264,3 +265,4 @@ Initially basic authentication. (order of priority)
 `GET /api/1/performance/<PERFORMANCE>/recordings` -> array of recordings
 
 `GET /api/1/performance/<PERFORMANCE>/roles` -> array of RoleAssignments
+`PUT /api/1/performance/<PERFORMANCE>/account/<ACCOUNT>/role/<ROLE>` - send true/false

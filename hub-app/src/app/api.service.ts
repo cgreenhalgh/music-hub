@@ -159,4 +159,8 @@ export class ApiService {
   getRolesForWork(workid): Observable<RoleAssignment[]> {
     return this.http.get<RoleAssignment[]>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/roles', {headers:this.getHeaders()})
   }
+  setWorkAccountRole(workid:string, accountid:string, role:string, grant:boolean): Observable<boolean> {
+    return this.http.put<boolean>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/account/'+encodeURIComponent(accountid)+'/role/'+role, {grant:grant}, {headers:this.getHeaders()})
+  }
+  
 }
