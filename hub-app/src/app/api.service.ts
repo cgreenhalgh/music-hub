@@ -116,6 +116,14 @@ export class ApiService {
     delete p.work
     return this.http.put<Performance>(this.apiUrl+'/performance/'+encodeURIComponent(String(performance.id)), p, {headers: this.getHeaders()})
   }
+  postPerformanceOfWork(performance:Performance, workid: string): Observable<Performance> {
+    // selective... no cached values
+    let p:Performance = Object.assign({}, performance)
+    delete p.linked_performance
+    delete p.work
+    delete p.capabilities
+    return this.http.post<Performance>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/performances', p, {headers: this.getHeaders()})
+  }
   getMessageForError(err):string {
     let error = 'Error making request to server'
     if (err.error instanceof Error) {

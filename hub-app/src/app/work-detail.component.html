@@ -13,6 +13,11 @@
         <a [routerLink]="['/performance',performance.id]" >{{performance.title}}</a>
       </li>
     </ul>
+    <div>
+      <a type="button" (click)="addPerformance()"
+          *ngIf="!!work && !!work.capabilities && work.capabilities['create-work-performance']" 
+          class="btn btn-info" [routerLink]="['/work',work.id,'add']">Add new performance</a>
+    </div>
     <h3>Downloads</h3>
     <div *ngIf="error3" class="alert alert-danger">Error: {{error}}</div>
     <div *ngIf="loading3">Loading downloads...</div>

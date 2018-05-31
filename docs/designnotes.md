@@ -233,7 +233,7 @@ Initially basic authentication. (order of priority)
 
 (10) `PUT /api/1/performance/<PERFORMANCE>` -> edit performance info
 
-`POST /api/1/work/<WORK>/performances` -> add new performance
+(11) `POST /api/1/work/<WORK>/performances` -> add new performance
 
 `GET /api/1/work/<WORK>/downloads` -> array of downloads
 

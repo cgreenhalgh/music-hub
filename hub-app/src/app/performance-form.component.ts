@@ -77,7 +77,7 @@ export class PerformanceFormComponent implements OnChanges  {
     const p2:Performance = Object.assign({}, this.performance);
     let savePerformance = Object.assign(p2, formModel)
     // hack - probably should do all fields explicitly
-    if (""==(savePerformance.linked_performanceid as any))
+    if (savePerformance.linked_performanceid===null || savePerformance.linked_performanceid===undefined || ""==(savePerformance.linked_performanceid as any))
       savePerformance.linked_performanceid = null
     else
       savePerformance.linked_performanceid = Number(savePerformance.linked_performanceid as any)

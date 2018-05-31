@@ -7,15 +7,6 @@ export interface Account {
   roles?:RoleAssignment[]
 }
 
-export interface Work {
-  id:number
-  title:string
-  year:string
-  version?:string
-  composer?:string
-  description?:string
-}
-
 export interface Download {
   filename:string
 }
@@ -46,6 +37,16 @@ export enum Capability {
 
 export type Capabilities = { 
   [key: string]: boolean
+}
+
+export interface Work {
+  id:number
+  title:string
+  year:string
+  version?:string
+  composer?:string
+  description?:string
+  capabilities?:Capabilities
 }
 
 export interface Performance {

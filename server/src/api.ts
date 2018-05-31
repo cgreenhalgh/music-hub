@@ -3,7 +3,8 @@ import * as fs from 'fs'
 
 import { Work, Performance, Download, Capability } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
-  getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance } from './db'
+  getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
+  addPerformanceOfWork } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -51,8 +52,20 @@ router.get('/work/:workid', (req, res) => {
   //console.log(`get work ${workid}`)
   getWork(req.user, workid)
   .then((work) => {
-    res.setHeader('Content-type', 'application/json')
-    res.send(JSON.stringify(work))
+    // capabilities: EditWork, CreateWorkPerformance
+    work.capabilities = {}
+    return hasCapability(req.user, Capability.EditPerformance, work)
+    .then((access) => {
+      work.capabilities[Capability.EditPerformance] = access
+    })
+    .then(() => hasCapability(req.user, Capability.CreateWorkPerformance, work))
+    .then((access) => {
+      work.capabilities[Capability.CreateWorkPerformance] = access
+    })
+    .then(() => {
+      res.setHeader('Content-type', 'application/json')
+      res.send(JSON.stringify(work))
+    })
   })
   .catch((err) => {
     sendError(res, err)
@@ -182,6 +195,21 @@ router.put('/performance/:performanceid', (req, res) => {
   }
   putPerformance(req.user, performanceid, req.body as Performance)
   .then(() => returnPerformance(req, res, performanceid))
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// POST performance
+router.post('/work/:workid/performances', (req, res) => {
+  var workid
+  try { workid = Number(req.params.workid) }
+  catch (err) {
+    console.log(`put /work/${req.params.workid}/performances - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  addPerformanceOfWork(req.user, req.body as Performance, workid)
+  .then((performanceid) => returnPerformance(req, res, performanceid))
   .catch((err) => {
     sendError(res, err)
   })

@@ -390,6 +390,72 @@ export function putPerformance(account:Account, performanceid:number, performanc
     
   })
 }
+export function addPerformanceOfWork(account:Account, performance:Performance, workid:number) : Promise<number> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      // get the work
+      let query = 'SELECT * FROM `work` WHERE `id` = ?'
+      let params = [workid]
+      con.query(query, params, (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing addPerformanceOfWork/getWork select: ${err.message}`)
+            reject(err)
+            return
+          }
+          if (results.length==0) {
+            con.release()
+            reject(new NotFoundError(`work ${workid} not found`))
+            return
+          }
+          let work:Work = results[0] as Work
+          // check permission to add
+          hasCapability(account, Capability.CreateWorkPerformance, work)
+          .then((access) => {
+            if (access) {
+              // INSERT
+              let insert  = 'INSERT INTO `performance` (`title`, `description`, '+
+                  '`performer_title`, `performer_bio`, `location`, '+
+                  '`venue_title`, `date`, `time`, `timezone`, '+
+                  '`public`, `status`, `linked_performanceid`, '+
+                  '`workid`) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )'
+              let params = [performance.title, performance.description, 
+                    performance.performer_title, performance.performer_bio, performance.location,
+                    performance.venue_title, (""==performance.date ? null : performance.date), 
+                    (""==performance.time ? null : performance.time), performance.timezone,
+                    performance.ispublic ? 1 : 0, performance.status, performance.linked_performanceid,
+                    work.id]
+              con.query(insert, params, (err, result) => {
+                con.release()
+                if (err) {
+                  console.log(`Error doing addPerformanceOfWork update: ${err.message}`)
+                  reject(new BadRequestError(err.message))
+                  return
+                }
+                // return new id
+                console.log('added performance '+result.insertId)
+                resolve(result.insertId)
+              })
+            } else {
+              con.release()
+              reject(new PermissionError(`work ${workid} performances cannot be added by ${account.email}`))
+            }
+          })
+          .catch((err) => {
+            con.release()
+            console.log(`Error checking access to work ${workid}: ${err.message}`, err)
+            reject(err)
+          })
+      })
+    })
+  })
+}
 
 // low-level - no security
 export function getRawPerformance(performanceid:number) : Promise<Performance> {

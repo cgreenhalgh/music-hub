@@ -1,0 +1,12 @@
+<div class="row">
+  <div class="col-12">
+    <div *ngIf="error" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading">Loading work...</div>
+    <h2>Add Performance</h2>
+    <div *ngIf="!!work">
+      <p>Work: {{ work.title }} ({{work.year}})</p>
+    </div>
+    <hub-performance-form *ngIf="!!newPerformance" [performance]="newPerformance"
+      (cancel)='cancel()' (save)='save($event)' (disabled)='loading || saving'></hub-performance-form>
+  </div>
+</div>

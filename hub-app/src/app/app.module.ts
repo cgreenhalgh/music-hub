@@ -8,6 +8,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { WorksComponent } from './works.component';
 import { WorkDetailComponent } from './work-detail.component';
+import { AddPerformanceComponent } from './add-performance.component';
 import { PerformanceDetailComponent } from './performance-detail.component';
 import { PerformanceFormComponent } from './performance-form.component';
 import { IntegrationDetailComponent } from './integration-detail.component';
@@ -20,6 +21,7 @@ import { ApiService } from './api.service';
     AppComponent,
     WorksComponent,
     WorkDetailComponent,
+    AddPerformanceComponent,
     PerformanceDetailComponent,
     PerformanceFormComponent,
     IntegrationDetailComponent,
