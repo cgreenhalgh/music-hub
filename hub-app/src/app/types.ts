@@ -1,16 +1,3 @@
-export interface Account {
-  id:number
-  email:string
-  // passwordhash:string
-  nickname:string
-  description:string
-  roles?:RoleAssignment[]
-}
-
-export interface Download {
-  filename:string
-}
-
 export enum Capability {
   //System capabilities:
   CreateAccount = 'create-account',
@@ -30,6 +17,7 @@ export enum Capability {
   EditRolesPerformance = 'edit-roles-performance',
   CreateRecording = 'create-recording',
   ManagePerformanceIntegration = 'manage-performance-integration',
+  CreatePerformanceIntegration = 'create-performance-integration',
   // Capabilities in relation to a recording:
   EditRecording = 'edit-recording',
   ViewRecording = 'view-recording'
@@ -37,6 +25,19 @@ export enum Capability {
 
 export type Capabilities = { 
   [key: string]: boolean
+}
+
+export interface Account {
+  id:number
+  email:string
+  // passwordhash:string
+  nickname:string
+  description:string
+  roles?:RoleAssignment[]
+}
+
+export interface Download {
+  filename:string
 }
 
 export interface Work {

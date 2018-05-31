@@ -11,10 +11,13 @@
     <div class="navbar-collapse" [ngbCollapse]="navbarCollapsed" id="navbarContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item" [routerLinkActive]="['active']">
-          <a class="nav-link" [routerLink]="['account']" (click)="navbarCollapsed = true">Account</a>
+          <a class="nav-link" [routerLink]="['account']" (click)="navbarCollapsed = true">My account</a>
         </li>
         <li class="nav-item" [routerLinkActive]="['active']">
-          <a class="nav-link" [routerLink]="['works']" (click)="navbarCollapsed = true">Works</a>
+          <a class="nav-link" [routerLink]="['works']" (click)="navbarCollapsed = true">All works</a>
+        </li>
+        <li class="nav-item" [routerLinkActive]="['active']">
+          <a class="nav-link" [routerLink]="['accounts']" (click)="navbarCollapsed = true">All accounts</a>
         </li>
       </ul>
     </div>

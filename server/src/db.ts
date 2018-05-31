@@ -950,3 +950,27 @@ export function getRawPerformanceIntegrationsForSetting(pluginid:number, setting
   })
 }
 
+export function getAccounts(account:Account) : Promise<Account[]> {
+  return new Promise((resolve,reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      con.query('SELECT `id`, `email`, `nickname`, `description` FROM `account`',
+        [], (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing select: ${err.message}`)
+            reject(err)
+            return
+          }
+          con.release()
+          let accounts:Account[] = results.map((r) => r as Account)
+          resolve(accounts)
+      })
+    })
+  })
+}

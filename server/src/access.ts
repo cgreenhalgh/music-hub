@@ -5,7 +5,7 @@ import { getRoles } from './db'
 
 export function hasCapability(account:Account, capability:Capability, work?:Work, performance?:Performance, onaccount?:Account, recording?:Recording): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    if (Capability.CreateAccount==capability || Capability.ManageAccount==capability) {
+    if (Capability.CreateAccount==capability || Capability.ManageAccount==capability || Capability.CreatePerformanceIntegration==capability) {
       // admin-only
       getRoles(account, null, null)
       .then((roles) => {
@@ -76,6 +76,19 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
         } else if (Capability.DownloadWork==capability && roles.indexOf(Role.Performer)>=0) {
           // performer can download
           resolve(true)
+        } else if (Capability.EditRolesWork==capability || Capability.EditRolesPerformance==capability) {
+          // admin
+          getRoles(account, null, null)
+          .then((roles) => {
+            if (roles.indexOf(Role.Admin)>=0) {
+              resolve(true)
+              return
+            } else {
+              resolve(false)
+              return
+            }
+          })
+          .catch((err) => { reject(err) })
         } else {
           //reject(new PermissionError(`${account.email} does not have Owner rights on ${work.title}`))
           resolve(false)
@@ -116,13 +129,25 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
           if (roles.indexOf(Role.PerformanceManager)>=0) {
             resolve(true)
             return
+          } else if (Capability.ViewPerformance==capability) {
+            getRoles(account, null, null)
+            .then((roles) => {
+              if (roles.indexOf(Role.Admin)>=0) {
+                resolve(true)
+                return
+              } else {
+                //reject(new PermissionError(`${account.email} does not have Edit rights on ${work.title} ${performance.title}`))
+                resolve(false)
+                return
+              }
+            })
+            .catch((err) => { reject(err) })
           } else {
-            //reject(new PermissionError(`${account.email} does not have Edit rights on ${work.title} ${performance.title}`))
             resolve(false)
             return
           }
         })
-      .catch((err) => { reject(err) })
+        .catch((err) => { reject(err) })
       })
       .catch((err) => { reject(err) })
     } else if (Capability.ManagePerformanceIntegration==capability || Capability.CreateRecording==capability || Capability.EditRecording==capability || Capability.ViewRecording==capability) {
@@ -154,6 +179,18 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
         if (roles.indexOf(Role.PerformanceManager)>=0) {
           resolve(true)
           return
+        } else if (Capability.ViewRecording==capability) {
+          getRoles(account, null, null)
+          .then((roles) => {
+            if (roles.indexOf(Role.Admin)>=0) {
+              resolve(true)
+              return
+            } else {
+              resolve(false)
+              return
+            }
+          })
+          .catch((err) => { reject(err) })
         } else {
           //reject(new PermissionError(`${account.email} does not have performance management rights on ${work.title} ${performance.title}`))
           resolve(false)

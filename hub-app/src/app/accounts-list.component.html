@@ -1,0 +1,14 @@
+<div class="row">
+  <div class="col-12">
+    <div *ngIf="error" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="loading">Loading accounts...</div>
+    <h3>Accounts:</h3>
+    <ul>
+      <li *ngFor="let account of accounts">{{ account.nickname }} ({{account.email}})</li>
+    </ul>
+    <div>
+      <input type="button" (click)="addAccount()"
+          *ngIf="isadmin" class="btn btn-info" value="Add new account"/>
+    </div>
+  </div>
+</div>

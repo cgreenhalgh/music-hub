@@ -138,4 +138,10 @@ export class ApiService {
     }
     return error
   }
+  getAccounts(): Observable<Account[]> {
+    return this.http.get<Account[]>(this.apiUrl+'/accounts', {headers:this.getHeaders()})
+  }
+  hasCapability(capability:string): Observable<boolean> {
+    return this.http.get<boolean>(this.apiUrl+'/capability/'+encodeURIComponent(capability), {headers:this.getHeaders()})
+  }
 }

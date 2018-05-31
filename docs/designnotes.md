@@ -136,19 +136,20 @@ Capabilities in relation to a work:
 - `edit-work` (owner)
 - `view-work` (anyone - for now - all works are public!)
 - `download-work` (owner, performer of work)
-- `edit-roles-work` (owner)
+- `edit-roles-work` (owner or admin)
 - `create-work-performance` (owner; ?? performer ??) -> establishes performance manager (required unless owner)
 
 Capabilities in relation to a performance:
 - `edit-performance` (work owner or performance manager)
-- `view-performance`  (anyone if public, else work owner or performance manager)
-- `edit-roles-performance` (owner of work)
+- `view-performance`  (anyone if public, else admin, work owner or performance manager)
+- `edit-roles-performance` (owner of work or admin)
 - `create-recording` (default: performance manager)
 - `manage-performance-integration` (default: performance manager)
+- `create-performance-integration` (admin)
 
 Capabilities in relation to a recording:
 - `edit-recording` (default: performance manager)
-- `view-recording` (anyone if public, else performance manager)
+- `view-recording` (anyone if public, else owner or performance manager)
 
 Multiple _performances_ of a work.
 
@@ -225,6 +226,9 @@ Web API.
 Initially basic authentication. (order of priority)
 
 `GET /api/1/account` -> account info.
+
+(13) `GET /api/1/capability/<CAPABILITY>` -> true/false
+(12) `GET /api/1/accounts` -> all accounts info.
 
 `GET /api/1/works` -> array of works
 `GET /api/1/work/<WORK>` -> work info

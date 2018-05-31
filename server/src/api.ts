@@ -4,7 +4,7 @@ import * as fs from 'fs'
 import { Work, Performance, Download, Capability } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
-  addPerformanceOfWork } from './db'
+  addPerformanceOfWork, getAccounts } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -341,6 +341,27 @@ router.post('/performance/:performanceid/integration/:pluginid/:actionid', (req,
         sendError(res, err)
       })
     })
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// GET accounts
+router.get('/accounts', (req, res) => {
+  getAccounts(req.user)
+  .then((accounts) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(accounts))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+router.get('/capability/:capability', (req, res) => {
+  hasCapability(req.user, req.params.capability, null, null)
+  .then((access) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(access))
   })
   .catch((err) => {
     sendError(res, err)

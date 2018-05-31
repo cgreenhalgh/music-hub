@@ -14,6 +14,7 @@ import { PerformanceFormComponent } from './performance-form.component';
 import { IntegrationDetailComponent } from './integration-detail.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AccountComponent } from './account.component';
+import { AccountsListComponent } from './accounts-list.component';
 import { ApiService } from './api.service';
 
 @NgModule({
@@ -25,7 +26,8 @@ import { ApiService } from './api.service';
     PerformanceDetailComponent,
     PerformanceFormComponent,
     IntegrationDetailComponent,
-    AccountComponent
+    AccountComponent,
+    AccountsListComponent
   ],
   imports: [
     BrowserModule,
