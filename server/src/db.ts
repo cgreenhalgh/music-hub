@@ -384,6 +384,30 @@ export function getWorks(account:Account) : Promise<Work[]> {
     
   })
 }
+export function getPlugins(account:Account) : Promise<Plugin[]> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `plugin`'
+      con.query(query, (err, results, fields) => {
+          con.release()
+          if (err) {
+            console.log(`Error doing getPlugins select: ${err.message}`)
+            reject(err)
+            return
+          }
+          let plugins:Plugin[] = results.map((r) => r as Plugin)
+          resolve(plugins)
+      })
+    })
+    
+  })
+}
 export function getWork(account:Account, workid:number) : Promise<Work> {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, con) => {

@@ -5,7 +5,7 @@ import { Work, Performance, Download, Capability, Account, RoleAssignment, Role 
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
   addPerformanceOfWork, getAccounts, addAccount, getPerformanceRoles, getWorkRoles, setWorkAccountRole,
-  setPerformanceAccountRole } from './db'
+  setPerformanceAccountRole, getPlugins } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -524,6 +524,16 @@ router.put('/performance/:performanceid/account/:accountid/role/:roleid', (req, 
   .then((changed) => {
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(changed))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+router.get('/plugins', (req, res) => {
+  getPlugins(req.user)
+  .then((plugins) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(plugins))
   })
   .catch((err) => {
     sendError(res, err)

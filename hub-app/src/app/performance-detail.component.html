@@ -46,5 +46,22 @@
         <a [routerLink]="['/performance',perfint.performanceid,'integration',perfint.plugin.id]" >{{perfint.plugin.title}} ({{perfint.plugin.code}})</a>, Enabled: {{perfint.enabled}}
       </li>
     </ul>
+    <form *ngIf="canCreatePerfints" [formGroup]="pluginForm" (ngSubmit)="newPerfint()">
+      <div class="form-group">
+        <label>Enable a new plugin</label>
+        <select formControlName="pluginid" class="form-control">
+          <option [value]="null"></option>
+          <option *ngFor="let plugin of plugins" [value]="plugin.id">{{plugin.title}} ({{plugin.code}})</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>GUID*:</label>
+        <input class='form-control' formControlName="guid" >
+      </div>
+      <div>
+        <button type="submit"
+            [disabled]="pluginForm.pristine || savingPlugin || !pluginForm.valid" class="btn btn-info">Enable plugin</button> &nbsp;
+      </div>
+    </form>
   </div>
 </div>

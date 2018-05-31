@@ -165,5 +165,10 @@ export class ApiService {
   setPerformanceAccountRole(performanceid:string, accountid:string, role:string, grant:boolean): Observable<boolean> {
     return this.http.put<boolean>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/account/'+encodeURIComponent(accountid)+'/role/'+role, {grant:grant}, {headers:this.getHeaders()})
   }
-  
+  getPlugins() : Observable<Plugin[]> {
+    return this.http.get<Plugin[]>(this.apiUrl+'/plugins', {headers:this.getHeaders()})
+  }
+  savePerformanceIntegration(perfint:PerformanceIntegration) : Observable<boolean> {
+    return this.http.put<boolean>(this.apiUrl+'/performance/'+encodeURIComponent(perfint.performanceid)+'/integration/'+encodeURIComponent(perfint.pluginid), perfint, {headers:this.getHeaders()})
+  }
 }

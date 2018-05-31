@@ -252,7 +252,9 @@ Initially basic authentication. (order of priority)
 
 (4) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> integration info (including links to integration-specific downloads?!)
 
-`PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> edit (create?!) integration info
+`GET /api/1/plugins` -> array of Plugins
+
+`PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> edit /create integration info
 
 (5)`PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/<ACTION>` -> perform a plugin action
 

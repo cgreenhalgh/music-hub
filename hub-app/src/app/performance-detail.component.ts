@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import { Work, Performance, Plugin, PerformanceIntegration, RoleAssignment, Capability, Role, Account } from './types'
+import { Work, Performance, Plugin, PerformanceIntegration, RoleAssignment, Capability, Role, Account, Plugin } from './types'
 import { ApiService } from './api.service'
 
 import 'rxjs/add/operator/switchMap';
@@ -28,13 +29,29 @@ export class PerformanceDetailComponent implements OnInit {
   addRoleAccountid:number
   savingRoles:boolean
   roleError:string
+  canCreatePerfints:boolean
+  plugins:Plugin[]
+  pluginForm: FormGroup
+  perfint:PerformanceIntegration
     
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private fb: FormBuilder, 
     private api:ApiService
-  ) {}
-    
+  ) {
+    this.createForm();
+  }
+  createForm() { 
+    this.pluginForm = this.fb.group({
+      pluginid: ['', Validators.required ],
+      guid: ['', Validators.required ],
+     });
+  }
+  rebuildForm() {
+    this.pluginForm.reset(this.perfint);
+  }
+
   ngOnInit(): void {
     // use as Observable directly?!
     this.route.paramMap
@@ -69,10 +86,26 @@ export class PerformanceDetailComponent implements OnInit {
           },
           (err) => { console.log('error checking EditRolesPerformance') }
         )
+        this.canCreatePerfints = false
+        this.plugins = null
+        this.api.hasCapabilityOnPerformance(Capability.CreatePerformanceIntegration, params.get('performanceid')).subscribe(
+          (res) => { 
+            this.canCreatePerfints = res 
+            if (this.canCreatePerfints)
+              this.api.getPlugins().subscribe(
+                (res) => { this.plugins = res; },
+                (err) => { console.log('error getting plugins', err) }
+              )
+          },
+          (err) => { console.log('error checking CreatePerformanceIntegration') }
+        )
         this.api.getAccounts().subscribe(
           (res) => { this.accounts = res; },
           (err) => { console.log('error getting accounts', err) }
         )
+        this.savingPlugin = false
+        this.perfint = {} as PerformanceIntegration
+        this.rebuildForm()
       })
   }
   edit() {
@@ -119,5 +152,38 @@ export class PerformanceDetailComponent implements OnInit {
         this.roleError = this.api.getMessageForError(err)
       }
     )
+  }
+  newPerfint() {
+    this.perfint = this.prepareSavePerfint();
+    this.rebuildForm();
+    this.error2 = null
+    console.log('save perfint', this.perfint);
+    this.pluginForm.disable()
+    this.api.savePerformanceIntegration(this.perfint).subscribe(
+      (res) => {
+        this.pluginForm.enable()
+        this.perfint = {} as PerformanceIntegration
+        this.rebuildForm()
+        this.api.getPerformanceIntegrations(this.performanceid).subscribe(
+          (res) => { this.performanceIntegrations = res; this.loading2=false; },
+          (err) => { this.error2 = err.message; this.loading2=false }
+        )
+      },
+      (err) => {
+        this.pluginForm.enable()
+        this.error2 = this.api.getMessageForError(err)
+      }
+    )
+  }
+  prepareSavePerfint(): PerformanceIntegration {
+    const formModel = this.pluginForm.value;
+    const perfint:PerformanceIntegration = {
+      //id:0,
+      performanceid: Number(this.performanceid),
+      pluginid: formModel.pluginid!=null ? Number(formModel.pluginid) : null,
+      guid: formModel.guid,
+      enabled: true,
+    }
+    return perfint;
   }
 }
