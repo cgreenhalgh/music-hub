@@ -1,31 +1,7 @@
-import { Account, Work, Performance, Role, Recording } from './types'
+import { Account, Work, Performance, Role, Recording, Capability } from './types'
 import { getRoles } from './db'
 //import { PermissionError } from './exceptions'
 // access control
-
-export enum Capability {
-  //System capabilities:
-  CreateAccount = 'create-account',
-  EditAccount = 'edit-account',
-  ManageAccount = 'manage-account', // e.g. block
-  ViewAccount = 'view-account',
-  // Capabilities in relation to a work:
-  CreateWork = 'create-work',
-  EditWork = 'edit-work',
-  ViewWork = 'view-work',
-  DownloadWork = 'download-work',
-  EditRolesWork = 'edit-roles-work',
-  CreateWorkPerformance = 'create-work-performance',
-  // Capabilities in relation to a performance:
-  EditPerformance = 'edit-performance',
-  ViewPerformance = 'view-performance',
-  EditRolesPerformance = 'edit-roles-performance',
-  CreateRecording = 'create-recording',
-  ManagePerformanceIntegration = 'manage-performance-integration',
-  // Capabilities in relation to a recording:
-  EditRecording = 'edit-recording',
-  ViewRecording = 'view-recording'
-}
 
 export function hasCapability(account:Account, capability:Capability, work?:Work, performance?:Performance, onaccount?:Account, recording?:Recording): Promise<boolean> {
   return new Promise((resolve, reject) => {

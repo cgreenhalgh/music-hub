@@ -2,10 +2,10 @@ import * as express from 'express'
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { Work, Download } from './types'
+import { Work, Download,Capability } from './types'
 import { authenticate, getWork } from './db'
 import { unauthorized, badrequest, sendError, getDownloadsDirForWork, crossDomainOptions, basicAuthentication } from './utils'
-import { Capability, hasCapability } from './access'
+import { hasCapability } from './access'
 import { AuthenticationError, PermissionError, NotFoundError } from './exceptions'
 
 const router = express.Router()

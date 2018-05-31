@@ -1,7 +1,7 @@
 // database
 import * as mysql from 'mysql'
-import { Account, RoleAssignment, Role, Work, Performance, Plugin, PluginSetting, PerformanceIntegration, Recording } from './types'
-import { Capability, hasCapability } from './access'
+import { Account, RoleAssignment, Role, Work, Performance, Plugin, PluginSetting, PerformanceIntegration, Recording, Capability } from './types'
+import { hasCapability } from './access'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 
 let password = process.env['MUSICHUB_PASSWORD']

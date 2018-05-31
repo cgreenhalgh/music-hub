@@ -140,7 +140,7 @@ Capabilities in relation to a work:
 - `create-work-performance` (owner; ?? performer ??) -> establishes performance manager (required unless owner)
 
 Capabilities in relation to a performance:
-- `edit-performance` (anyone if public, else work owner or performance manager)
+- `edit-performance` (work owner or performance manager)
 - `view-performance`  (anyone if public, else work owner or performance manager)
 - `edit-roles-performance` (owner of work)
 - `create-recording` (default: performance manager)

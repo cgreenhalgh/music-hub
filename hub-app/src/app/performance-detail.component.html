@@ -13,7 +13,7 @@
       <div *ngIf="!editing && !saving">
         <div style="margin-bottom: 1em">
           <button type="button" (click)="edit()"
-            [disabled]="false" class="btn btn-info">Edit</button>
+            [disabled]="false" *ngIf="!!performance.capabilities && !!performance.capabilities['edit-performance']" class="btn btn-info">Edit</button>
         </div>
         <p *ngIf="performance.work">Work: {{ performance.work.title }} ({{performance.work.year}})</p>
         <p>Performer: {{performance.performer_title}} - {{performance.performer_bio}}</p>

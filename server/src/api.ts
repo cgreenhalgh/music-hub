@@ -1,11 +1,11 @@
 import * as express from 'express'
 import * as fs from 'fs'
 
-import { Work, Performance, Download } from './types'
+import { Work, Performance, Download, Capability } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
-import { Capability, hasCapability } from './access'
+import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
 import { unauthorized, badrequest, sendError, getDownloadsDirForWork, crossDomainOptions, basicAuthentication } from './utils'
 
@@ -139,6 +139,20 @@ function returnPerformance(req, res, performanceid) {
     })
   })
   .then(() => {
+    // capabilities: EditPerformance, ManagePerformanceIntegration
+    ps[0].capabilities = {}
+    return hasCapability(req.user, Capability.EditPerformance, ps[0].work, ps[0])
+    .then((access) => {
+      ps[0].capabilities[Capability.EditPerformance] = access
+    })
+  })
+  .then(() => {
+    return hasCapability(req.user, Capability.ManagePerformanceIntegration, ps[0].work, ps[0])
+    .then((access) => {
+      ps[0].capabilities[Capability.ManagePerformanceIntegration] = access
+    })
+  })
+  .then(() => {
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(ps[0]))
    })
@@ -238,8 +252,16 @@ router.get('/performance/:performanceid/integration/:pluginid', (req, res) => {
     }
     let actions = plugin.getActions()
     perfint.plugin.actions = actions
-    res.setHeader('Content-type', 'application/json')
-    res.send(JSON.stringify(perfint))
+    perfint.capabilities = {}
+    // check capability
+    return hasCapability(req.user, Capability.ManagePerformanceIntegration, perfint.performance.work, perfint.performance)
+    .then((access) => {
+      perfint.capabilities[Capability.ManagePerformanceIntegration] = access
+    })
+    .then(() => {
+      res.setHeader('Content-type', 'application/json')
+      res.send(JSON.stringify(perfint))
+    })
   })
   .catch((err) => {
     sendError(res, err)

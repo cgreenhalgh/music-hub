@@ -20,6 +20,34 @@ export interface Download {
   filename:string
 }
 
+export enum Capability {
+  //System capabilities:
+  CreateAccount = 'create-account',
+  EditAccount = 'edit-account',
+  ManageAccount = 'manage-account', // e.g. block
+  ViewAccount = 'view-account',
+  // Capabilities in relation to a work:
+  CreateWork = 'create-work',
+  EditWork = 'edit-work',
+  ViewWork = 'view-work',
+  DownloadWork = 'download-work',
+  EditRolesWork = 'edit-roles-work',
+  CreateWorkPerformance = 'create-work-performance',
+  // Capabilities in relation to a performance:
+  EditPerformance = 'edit-performance',
+  ViewPerformance = 'view-performance',
+  EditRolesPerformance = 'edit-roles-performance',
+  CreateRecording = 'create-recording',
+  ManagePerformanceIntegration = 'manage-performance-integration',
+  // Capabilities in relation to a recording:
+  EditRecording = 'edit-recording',
+  ViewRecording = 'view-recording'
+}
+
+export type Capabilities = { 
+  [key: string]: boolean
+}
+
 export interface Performance {
   id:number
   workid:number
@@ -37,6 +65,9 @@ export interface Performance {
   status:string
   linked_performanceid:number
   linked_performance?:Performance
+  rev_linked_performance?:Performance
+  recordings?:Recording[]
+  capabilities?:Capabilities
 }
 
 export enum Role {
@@ -57,7 +88,13 @@ export interface RoleAssignment {
 }
 
 export interface Recording {
-// TODO finish recording
+  id:number
+  workid:number
+  performanceid:number
+  relpath:string
+  mimetype:string
+  perspective?:string
+  start_time_offset:number
   ispublic:boolean
 }
 
@@ -102,4 +139,7 @@ export interface PerformanceIntegration {
   plugin?:Plugin
   enabled:boolean
   guid?:string
+  settings?:PluginSetting[]
+  capabilities?:Capabilities
 }
+
