@@ -26,9 +26,17 @@
     </div>
     <div *ngIf="canEditRoles">
       <h3>Roles</h3>
+      <div *ngIf="roleError" class="alert alert-danger">Error: {{roleError}}</div>
       <ul>
-        <li *ngFor="let ra of roleAssignments">{{ra.role}}: {{ra.account.nickname}} ({{ra.account.email}})</li>
+        <li *ngFor="let ra of roleAssignments">{{ra.role}}: {{ra.account.nickname}} ({{ra.account.email}})
+          <button type="button" [disabled]="savingRoles" class="btn btn-info btn-sm" (click)="removeRoleAssignent(ra)">Remove</button>
+        </li>
       </ul>
+      <select [(ngModel)]="addRoleAccountid">
+        <option [value]="null"></option>
+        <option *ngFor="let account of accounts" [value]="account.id">{{account.nickname}} ({{account.email}})</option>
+      </select>
+      <button type="button" [disabled]="savingRoles" class="btn btn-info btn-sm" (click)="addPerformanceManager()">Make manager</button>
     </div>
     <h3>Tools</h3>
     <div *ngIf="error2" class="alert alert-danger">Error: {{error}}</div>

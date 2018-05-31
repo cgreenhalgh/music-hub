@@ -265,4 +265,4 @@ Initially basic authentication. (order of priority)
 `GET /api/1/performance/<PERFORMANCE>/recordings` -> array of recordings
 
 `GET /api/1/performance/<PERFORMANCE>/roles` -> array of RoleAssignments
-`PUT /api/1/performance/<PERFORMANCE>/account/<ACCOUNT>/role/<ROLE>` - send true/false
+`PUT /api/1/performance/<PERFORMANCE>/account/<ACCOUNT>/role/<ROLE>` - send {grant:true/false}

@@ -281,6 +281,71 @@ export function setWorkAccountRole(account:Account, workid: number, accountid: n
     .catch(err => reject(err))
   })
 }
+export function setPerformanceAccountRole(account:Account, performanceid: number, accountid: number, role: string, grant:boolean) : Promise<boolean> {
+  return new Promise((resolve,reject) => {
+    getPerformance(account, performanceid)
+    .then((performance) => {
+      hasCapability(account, Capability.EditRolesPerformance, performance.work, performance)
+      .then((access) => {
+        if (!access) {
+          reject(new PermissionError(`cannot edit roles in performance`))
+          return
+        }
+        pool.getConnection((err, con) => {
+          if (err) {
+            console.log(`Error getting connection: ${err.message}`)
+            reject(err)
+            return
+          }
+          if (!grant) {
+            // remove
+            let query = 'DELETE FROM `role` WHERE `workid` = ? AND `accountid` = ? AND `role` = ? AND `performanceid` = ?'
+            let params = [performance.workid, accountid, role, performanceid]
+            con.query(query, params, (err, results, fields) => {
+              con.release()
+              if (err) {
+                console.log(`Error doing setWorkAccountPerformance delete: ${err.message}`)
+                reject(err)
+                return
+              }
+              resolve(results.affectedRows!=0)
+            })
+            return;
+          }
+          // check/add
+          let query = 'SELECT `role` FROM `role` WHERE `workid` = ? AND `accountid` = ? AND `role` = ? AND `performanceid` = ?'
+          let params = [performance.workid, accountid, role, performanceid]
+          con.query(query, params, (err, results, fields) => {
+            if (err) {
+              con.release()
+              console.log(`Error doing setWorkAccountPerformance select: ${err.message}`)
+              reject(err)
+              return
+            }
+            if (results.length==0) {
+              let query = 'INSERT INTO `role` ( `role`, `workid`, `accountid`, `performanceid`) VALUES ( ?, ?, ?, ? )'
+              let params = [role, performance.workid, accountid, performanceid]
+              con.query(query, params, (err, results, fields) => {
+                con.release()
+                if (err) {
+                  console.log(`Error doing setWorkAccountPerformance insert: ${err.message}`)
+                  reject(err)
+                  return
+                }
+                resolve(true)
+              })
+              return;
+            }
+            con.release()
+            resolve(false)
+          })
+        })
+      })
+      .catch(err => reject(err))
+    })
+    .catch(err => reject(err))
+  })
+}
 export function getWorks(account:Account) : Promise<Work[]> {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, con) => {
