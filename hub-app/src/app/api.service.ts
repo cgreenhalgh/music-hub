@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Account, Work, Performance, PerformanceIntegration, PluginActionResponse, Download } from './types'
+import { Account, Work, Performance, PerformanceIntegration, PluginActionResponse, Download, RoleAssignment } from './types'
 
 export enum LoginState {
   LoggedOut = 1,
@@ -141,10 +141,22 @@ export class ApiService {
   getAccounts(): Observable<Account[]> {
     return this.http.get<Account[]>(this.apiUrl+'/accounts', {headers:this.getHeaders()})
   }
+  hasCapabilityOnPerformance(capability:string, performanceid:string): Observable<boolean> {
+    return this.http.get<boolean>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/capability/'+encodeURIComponent(capability), {headers:this.getHeaders()})
+  }
+  hasCapabilityOnWork(capability:string, workid:string): Observable<boolean> {
+    return this.http.get<boolean>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/capability/'+encodeURIComponent(capability), {headers:this.getHeaders()})
+  }
   hasCapability(capability:string): Observable<boolean> {
     return this.http.get<boolean>(this.apiUrl+'/capability/'+encodeURIComponent(capability), {headers:this.getHeaders()})
   }
   postAccount(account:Account): Observable<number> {
     return this.http.post<number>(this.apiUrl+'/accounts', account, {headers: this.getHeaders()} )
+  }
+  getRolesForPerformance(performanceid:string): Observable<RoleAssignment[]> {
+    return this.http.get<RoleAssignment[]>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/roles', {headers:this.getHeaders()})
+  }
+  getRolesForWork(workid): Observable<RoleAssignment[]> {
+    return this.http.get<RoleAssignment[]>(this.apiUrl+'/work/'+encodeURIComponent(workid)+'/roles', {headers:this.getHeaders()})
   }
 }

@@ -228,6 +228,8 @@ Initially basic authentication. (order of priority)
 `GET /api/1/account` -> account info.
 
 (13) `GET /api/1/capability/<CAPABILITY>` -> true/false
+(13) `GET /api/1/work/<WORK>/capability/<CAPABILITY>` -> true/false
+(13) `GET /api/1/performance/<PERFORMANCE>/capability/<CAPABILITY>` -> true/false
 (12) `GET /api/1/accounts` -> all accounts info.
 (14) `POST /api/1/accounts` -> return new id
 
@@ -241,6 +243,7 @@ Initially basic authentication. (order of priority)
 (11) `POST /api/1/work/<WORK>/performances` -> add new performance
 
 `GET /api/1/work/<WORK>/downloads` -> array of downloads
+(`GET /api/1/work/<WORK>/roles` -> array of RoleAssignments)
 
 `GET /downloads/<WORK>/<FILENAME>` -> download
 
@@ -259,3 +262,5 @@ Initially basic authentication. (order of priority)
 (9) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/download/<DOWNLOAD>` -> integration-specific download (e.g. MPM file?)
 
 `GET /api/1/performance/<PERFORMANCE>/recordings` -> array of recordings
+
+`GET /api/1/performance/<PERFORMANCE>/roles` -> array of RoleAssignments

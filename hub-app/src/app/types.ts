@@ -85,6 +85,7 @@ export enum Role {
 export interface RoleAssignment {
   id:number
   accountid:number
+  account?:Account
   role:Role
   workid?:number
   performanceid?:number

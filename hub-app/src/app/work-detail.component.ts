@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
-import { Work, Performance, Download } from './types'
+import { Work, Performance, Download, RoleAssignment, Capability } from './types'
 import { ApiService } from './api.service'
 
 import 'rxjs/add/operator/switchMap';
@@ -20,6 +20,8 @@ export class WorkDetailComponent implements OnInit {
   loading:boolean = true
   loading2:boolean = true
   loading3:boolean = true
+  canEditRoles:boolean = false
+  roleAssignments:RoleAssignment[]
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -47,6 +49,19 @@ export class WorkDetailComponent implements OnInit {
         this.api.getDownloadsForWork(params.get('workid')).subscribe(
           (res) => { this.downloads = res; this.loading3=false; },
           (err) => { this.error3 = err.message; this.loading3=false }
+        )
+        this.canEditRoles = false
+        this.roleAssignments = null
+        this.api.hasCapabilityOnWork(Capability.EditRolesWork, params.get('workid')).subscribe(
+          (res) => { 
+            this.canEditRoles = res 
+            if (this.canEditRoles)
+              this.api.getRolesForWork(params.get('workid')).subscribe(
+                (res) => { this.roleAssignments = res; },
+                (err) => { console.log('error getting role assignments', err) }
+              )
+          },
+          (err) => { console.log('error checking EditRolesWork') }
         )
       })
   }

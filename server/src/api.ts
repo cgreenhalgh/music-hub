@@ -1,10 +1,10 @@
 import * as express from 'express'
 import * as fs from 'fs'
 
-import { Work, Performance, Download, Capability, Account } from './types'
+import { Work, Performance, Download, Capability, Account, RoleAssignment } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
-  addPerformanceOfWork, getAccounts, addAccount } from './db'
+  addPerformanceOfWork, getAccounts, addAccount, getPerformanceRoles, getWorkRoles } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -367,12 +367,92 @@ router.get('/capability/:capability', (req, res) => {
     sendError(res, err)
   })
 })
+router.get('/work/:workid/capability/:capability', (req, res) => {
+  var workid
+  try { workid = Number(req.params.workid) }
+  catch (err) {
+    console.log(`get /work/${req.params.workid} - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  //console.log(`get work ${workid}`)
+  getWork(req.user, workid)
+  .then((work) => {
+    return hasCapability(req.user, req.params.capability, work, null)
+    .then((access) => {
+      res.setHeader('Content-type', 'application/json')
+      res.send(JSON.stringify(access))
+    })
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+router.get('/performance/:performanceid/capability/:capability', (req, res) => {
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    console.log(`get /work/${req.params.performanceid} - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  //console.log(`get work ${workid}`)
+  getPerformance(req.user, performanceid)
+  .then((performance) => {
+    return hasCapability(req.user, req.params.capability, performance.work, performance)
+    .then((access) => {
+      res.setHeader('Content-type', 'application/json')
+      res.send(JSON.stringify(access))
+    })
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
 // POST accounts
 router.post('/accounts', (req, res) => {
   addAccount(req.user, req.body as Account)
   .then((accountid) => {
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(accountid))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// GET performance roles
+router.get('/performance/:performanceid/roles', (req, res) => {
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    console.log(`get /performance/${req.params.performanceid}/roles - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  //console.log(`get work ${workid}`)
+  getPerformanceRoles(req.user, performanceid)
+  .then(ras => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(ras))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// GET performance roles
+router.get('/work/:workid/roles', (req, res) => {
+  var workid
+  try { workid = Number(req.params.workid) }
+  catch (err) {
+    console.log(`get /work/${req.params.performanceid}/roles - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  //console.log(`get work ${workid}`)
+  getWorkRoles(req.user, workid)
+  .then(ras => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(ras))
   })
   .catch((err) => {
     sendError(res, err)

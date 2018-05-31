@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
-import { Work, Performance, Plugin, PerformanceIntegration } from './types'
+import { Work, Performance, Plugin, PerformanceIntegration, RoleAssignment, Capability } from './types'
 import { ApiService } from './api.service'
 
 import 'rxjs/add/operator/switchMap';
@@ -21,6 +21,9 @@ export class PerformanceDetailComponent implements OnInit {
   errorEdit:string = null
   loading:boolean = true
   loading2:boolean = true
+  canEditRoles:boolean = false
+  roleAssignments:RoleAssignment[]
+    
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -45,6 +48,19 @@ export class PerformanceDetailComponent implements OnInit {
         this.api.getPerformanceIntegrations(params.get('performanceid')).subscribe(
           (res) => { this.performanceIntegrations = res; this.loading2=false; },
           (err) => { this.error2 = err.message; this.loading2=false }
+        )
+        this.canEditRoles = false
+        this.roleAssignments = null
+        this.api.hasCapabilityOnPerformance(Capability.EditRolesPerformance, params.get('performanceid')).subscribe(
+          (res) => { 
+            this.canEditRoles = res 
+            if (this.canEditRoles)
+              this.api.getRolesForPerformance(params.get('performanceid')).subscribe(
+                (res) => { this.roleAssignments = res; },
+                (err) => { console.log('error getting role assignments', err) }
+              )
+          },
+          (err) => { console.log('error checking EditRolesPerformance') }
         )
       })
   }

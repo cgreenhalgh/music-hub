@@ -136,6 +136,86 @@ export function getRoles(account:Account, workid?: number, performanceid?: numbe
   })
 }
 
+export function getPerformanceRoles(account:Account, performanceid: number) : Promise<RoleAssignment[]> {
+  return new Promise((resolve,reject) => {
+    getPerformance(account, performanceid)
+    .then((performance) => {
+      hasCapability(account, Capability.EditRolesPerformance, performance.work, performance)
+      .then((access) => {
+        if (!access) {
+          reject(new PermissionError(`cannot edit roles in performance`))
+          return
+        }
+        pool.getConnection((err, con) => {
+          if (err) {
+            console.log(`Error getting connection: ${err.message}`)
+            reject(err)
+            return
+          }
+          // Use the connection
+          let query = 'SELECT * FROM `role` WHERE `performanceid` = ?'
+          let params = [performanceid]
+          con.query(query, params, (err, results, fields) => {
+            if (err) {
+              con.release()
+              console.log(`Error doing getPerformanceRoles select: ${err.message}`)
+              reject(err)
+              return
+            }
+            con.release()
+            let ras:RoleAssignment[] = results.map((r) => { return r as RoleAssignment; })
+            let ps:Promise<void>[] = ras.map((ra) => { return getAccount(account, ra.accountid).then((ac) => {ra.account = ac}) })
+            Promise.all(ps)
+            .then(() => resolve(ras))
+            .catch(err => reject(err))
+          })
+        })
+      })
+      .catch(err => reject(err))
+    })
+    .catch(err => reject(err))
+  })
+}
+export function getWorkRoles(account:Account, workid: number) : Promise<RoleAssignment[]> {
+  return new Promise((resolve,reject) => {
+    getWork(account, workid)
+    .then((work) => {
+      hasCapability(account, Capability.EditRolesWork, work)
+      .then((access) => {
+        if (!access) {
+          reject(new PermissionError(`cannot edit roles in work`))
+          return
+        }
+        pool.getConnection((err, con) => {
+          if (err) {
+            console.log(`Error getting connection: ${err.message}`)
+            reject(err)
+            return
+          }
+          // Use the connection
+          let query = 'SELECT * FROM `role` WHERE `workid` = ? AND ISNULL(`performanceid`)'
+          let params = [workid]
+          con.query(query, params, (err, results, fields) => {
+            if (err) {
+              con.release()
+              console.log(`Error doing getPerformanceRoles select: ${err.message}`)
+              reject(err)
+              return
+            }
+            con.release()
+            let ras:RoleAssignment[] = results.map((r) => { return r as RoleAssignment; })
+            let ps:Promise<void>[] = ras.map((ra) => { return getAccount(account, ra.accountid).then((ac) => {ra.account = ac}) })
+            Promise.all(ps)
+            .then(() => resolve(ras))
+            .catch(err => reject(err))
+          })
+        })
+      })
+      .catch(err => reject(err))
+    })
+    .catch(err => reject(err))
+  })
+}
 export function getWorks(account:Account) : Promise<Work[]> {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, con) => {
@@ -1010,6 +1090,33 @@ export function getAccounts(account:Account) : Promise<Account[]> {
           con.release()
           let accounts:Account[] = results.map((r) => r as Account)
           resolve(accounts)
+      })
+    })
+  })
+}
+export function getAccount(account:Account, accountid:number) : Promise<Account> {
+  return new Promise((resolve,reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      con.query('SELECT `id`, `email`, `nickname`, `description` FROM `account` WHERE `id` = ?',
+        [accountid], (err, results, fields) => {
+        if (err) {
+          con.release()
+          console.log(`Error doing select: ${err.message}`)
+          reject(err)
+          return
+        }
+        con.release()
+        if (results.length==0) {
+          reject(new NotFoundError(`account ${accountid} not found`))
+          return
+        }
+        resolve(results[0] as Account)
       })
     })
   })

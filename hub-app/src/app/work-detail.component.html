@@ -26,5 +26,11 @@
         <a href="downloads/{{work.id}}/{{download.filename}}" target="_blank" download>{{download.filename}}</a>
       </li>
     </ul>
+    <div *ngIf="canEditRoles">
+      <h3>Roles</h3>
+      <ul>
+        <li *ngFor="let ra of roleAssignments">{{ra.role}}: {{ra.account.nickname}} ({{ra.account.email}})</li>
+      </ul>
+    </div>
   </div>
 </div>
