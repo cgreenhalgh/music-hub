@@ -6,9 +6,12 @@
     <ul>
       <li *ngFor="let account of accounts">{{ account.nickname }} ({{account.email}})</li>
     </ul>
-    <div>
+    <div *ngIf="!adding">
       <input type="button" (click)="addAccount()"
           *ngIf="isadmin" class="btn btn-info" value="Add new account"/>
+    </div>
+    <div *ngIf="adding || editing">
+      <hub-account-form (save)="save($event)" (cancel)="cancel()" [disabled]="saving" [account]="account"></hub-account-form>
     </div>
   </div>
 </div>

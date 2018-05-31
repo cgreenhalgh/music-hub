@@ -229,6 +229,7 @@ Initially basic authentication. (order of priority)
 
 (13) `GET /api/1/capability/<CAPABILITY>` -> true/false
 (12) `GET /api/1/accounts` -> all accounts info.
+(14) `POST /api/1/accounts` -> return new id
 
 `GET /api/1/works` -> array of works
 `GET /api/1/work/<WORK>` -> work info

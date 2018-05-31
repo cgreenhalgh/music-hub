@@ -58,6 +58,46 @@ export function authenticate(email:string, password:string) : Promise<Account> {
   })
 }
 
+export function addAccount(account:Account, newAccount:Account) : Promise<number> {
+  return new Promise((resolve,reject) => {
+    hasCapability(account, Capability.CreateAccount, null, null)
+    .then((access) => {
+      if (!access) {
+        reject(new PermissionError(`user cannot create account`))
+        return
+      }
+      pool.getConnection((err, con) => {
+        if (err) {
+          console.log(`Error getting connection: ${err.message}`)
+          reject(err)
+          return
+        }
+        // Use the connection
+        // INSERT
+        let insert  = 'INSERT INTO `account` (`nickname`, `description`, '+
+                  '`email`, `passwordhash`) VALUES ( ?, ?, ?, ?)'
+        // not (yet) a hash?!
+        let params = [newAccount.nickname, newAccount.description,
+          newAccount.email, newAccount.password]
+        con.query(insert, params, (err, result) => {
+          con.release()
+          if (err) {
+            console.log(`Error doing addAccount insert: ${err.message}`)
+            reject(new BadRequestError(err.message))
+            return
+          }
+          // return new id
+          console.log('added account '+result.insertId)
+          resolve(result.insertId)
+        })
+      })
+    })
+    .catch((err) => {
+      reject(err)
+    })
+  })
+}
+
 export function getRoles(account:Account, workid?: number, performanceid?: number) : Promise<string[]> {
   return new Promise((resolve,reject) => {
     pool.getConnection((err, con) => {

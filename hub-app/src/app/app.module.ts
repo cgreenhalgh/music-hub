@@ -14,6 +14,7 @@ import { PerformanceFormComponent } from './performance-form.component';
 import { IntegrationDetailComponent } from './integration-detail.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AccountComponent } from './account.component';
+import { AccountFormComponent } from './account-form.component';
 import { AccountsListComponent } from './accounts-list.component';
 import { ApiService } from './api.service';
 
@@ -27,6 +28,7 @@ import { ApiService } from './api.service';
     PerformanceFormComponent,
     IntegrationDetailComponent,
     AccountComponent,
+    AccountFormComponent,
     AccountsListComponent
   ],
   imports: [

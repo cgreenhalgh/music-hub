@@ -10,7 +10,7 @@ import { ApiService } from './api.service'
 export class PerformanceFormComponent implements OnChanges  {
   @Input() performance: Performance;
   @Input() disabled: boolean;
-  @Output() save: EventEmitter<any> = new EventEmitter();
+  @Output() save: EventEmitter<Performance> = new EventEmitter();
   @Output() cancel: EventEmitter<any> = new EventEmitter();
   performanceForm: FormGroup
   statuses:String[] = ["CONFIRMED"]

@@ -31,6 +31,7 @@ export interface Account {
   id:number
   email:string
   // passwordhash:string
+  password?:string
   nickname:string
   description:string
   roles?:RoleAssignment[]

@@ -1,10 +1,10 @@
 import * as express from 'express'
 import * as fs from 'fs'
 
-import { Work, Performance, Download, Capability } from './types'
+import { Work, Performance, Download, Capability, Account } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
-  addPerformanceOfWork, getAccounts } from './db'
+  addPerformanceOfWork, getAccounts, addAccount } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -362,6 +362,17 @@ router.get('/capability/:capability', (req, res) => {
   .then((access) => {
     res.setHeader('Content-type', 'application/json')
     res.send(JSON.stringify(access))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
+// POST accounts
+router.post('/accounts', (req, res) => {
+  addAccount(req.user, req.body as Account)
+  .then((accountid) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(accountid))
   })
   .catch((err) => {
     sendError(res, err)

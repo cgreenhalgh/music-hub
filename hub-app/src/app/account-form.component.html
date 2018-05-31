@@ -1,0 +1,24 @@
+<form [formGroup]="accountForm" (ngSubmit)="onSubmit()">
+  <div style="margin-bottom: 1em">
+    <button type="button" (click)="revert()"
+            [disabled]="disabled" class="btn btn-info">Cancel</button>
+    <button type="submit"
+            [disabled]="accountForm.pristine || disabled || !accountForm.valid" class="btn btn-info">Save</button> &nbsp;
+  </div>
+  <div class="form-group">
+    <label class="center-block">Nickname:*</label>
+    <input class="form-control" formControlName="nickname">
+  </div>
+  <div class="form-group">
+    <label class="center-block">Email:*</label>
+    <input class="form-control" formControlName="email">
+  </div>
+  <div class="form-group">
+    <label class="center-block">Description:</label>
+    <input class="form-control" formControlName="description">
+  </div>
+  <div class="form-group">
+    <label class="center-block">Password:</label>
+    <input class="form-control" formControlName="password">
+  </div>
+</form>

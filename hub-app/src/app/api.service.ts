@@ -36,7 +36,7 @@ export class ApiService {
     let l = this.loginSubject.getValue()
     if (l.username && l.password) {
       let auth="Basic "+ btoa(l.username + ":" + l.password);
-      console.log(`api call with ${l.username} ${l.password}`)
+      //console.log(`api call with ${l.username} ${l.password}`)
       return new HttpHeaders({'Authorization': auth})
      } else {
       console.log(`Warning: api call without username/password`)
@@ -143,5 +143,8 @@ export class ApiService {
   }
   hasCapability(capability:string): Observable<boolean> {
     return this.http.get<boolean>(this.apiUrl+'/capability/'+encodeURIComponent(capability), {headers:this.getHeaders()})
+  }
+  postAccount(account:Account): Observable<number> {
+    return this.http.post<number>(this.apiUrl+'/accounts', account, {headers: this.getHeaders()} )
   }
 }
