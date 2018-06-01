@@ -14,7 +14,7 @@
       </li>
     </ul>
     <div>
-      <a type="button" (click)="addPerformance()"
+      <a type="button" 
           *ngIf="!!work && !!work.capabilities && work.capabilities['create-work-performance']" 
           class="btn btn-info" [routerLink]="['/work',work.id,'add']">Add new performance</a>
     </div>

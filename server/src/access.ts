@@ -73,8 +73,8 @@ export function hasCapability(account:Account, capability:Capability, work?:Work
         if (roles.indexOf(Role.Owner)>=0) {
           resolve(true)
           return
-        } else if (Capability.DownloadWork==capability && roles.indexOf(Role.Performer)>=0) {
-          // performer can download
+        } else if ((Capability.DownloadWork==capability || Capability.CreateWorkPerformance==capability) && roles.indexOf(Role.Performer)>=0) {
+          // performer can download or create a performance
           resolve(true)
         } else if (Capability.EditRolesWork==capability || Capability.EditRolesPerformance==capability) {
           // admin

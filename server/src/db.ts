@@ -689,15 +689,27 @@ export function addPerformanceOfWork(account:Account, performance:Performance, w
                     performance.ispublic ? 1 : 0, performance.status, performance.linked_performanceid,
                     work.id]
               con.query(insert, params, (err, result) => {
-                con.release()
                 if (err) {
+                  con.release()
                   console.log(`Error doing addPerformanceOfWork update: ${err.message}`)
                   reject(new BadRequestError(err.message))
                   return
                 }
                 // return new id
                 console.log('added performance '+result.insertId)
-                resolve(result.insertId)
+                // default performance manager = adding use
+                let query = 'INSERT INTO `role` ( `role`, `workid`, `accountid`, `performanceid`) VALUES ( ?, ?, ?, ? )'
+                let params = [Role.PerformanceManager, workid, account.id, result.insertId]
+                con.query(query, params, (err, results, fields) => {
+                  con.release()
+                  if (err) {
+                    console.log(`**Error doing addPerformance role insert: ${err.message}`)
+                    // OK enough?!
+                    resolve(result.insertId)
+                    return
+                  }
+                  resolve(result.insertId)
+                })
               })
             } else {
               con.release()
