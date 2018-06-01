@@ -39,6 +39,11 @@ init db?!
 cat createdb.sql | docker run -i --rm --network=internal mysql:5.7 sh -c "exec mysql -hhubdb -P3306 -uroot -p`cat hubdb.password`"
 ```
 
+dump db
+```
+docker run -it --rm --network=internal mysql:5.7 sh -c "exec mysqldump --databases musichub  -hhubdb -P3306 -uroot -p`cat hubdb.password`" > hubdb-dump.sql
+ ```
+
 DB debug access:
 ```
 docker run -it --rm --network=internal mysql:5.7 sh -c "exec mysql -hhubdb -P3306 -uroot -p`cat hubdb.password`"
@@ -101,10 +106,12 @@ MVP - see [designnotes API design](docs/designnotes.md#API%20design):
 - archive generate top-level file
 - archive generate performance file
 
-future;
-- archive recording upload UI+server
+also done:
 - performance edit UI+server
-- work edit UI+server
-- plugin edit UI+server
 - account create UI+server
 - account role assignment UI+server
+- plugin edit UI+server
+
+future;
+- archive recording upload UI+server
+- work edit UI+server
