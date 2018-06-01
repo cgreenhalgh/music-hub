@@ -1,11 +1,11 @@
 import * as express from 'express'
 import * as fs from 'fs'
 
-import { Work, Performance, Download, Capability, Account, RoleAssignment, Role } from './types'
+import { Work, Performance, Download, Capability, Account, RoleAssignment, Role, PerformanceIntegration } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
   addPerformanceOfWork, getAccounts, addAccount, getPerformanceRoles, getWorkRoles, setWorkAccountRole,
-  setPerformanceAccountRole, getPlugins } from './db'
+  setPerformanceAccountRole, getPlugins, setPerformanceIntegration } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -539,7 +539,39 @@ router.get('/plugins', (req, res) => {
     sendError(res, err)
   })
 })
-
+router.put('/performance/:performanceid/integration/:pluginid', (req, res) => {
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    res.status(400).send(`performanceid ${req.params.performanceid} - not a number`)
+    return
+  }
+  var pluginid
+  try { pluginid = Number(req.params.pluginid) }
+  catch (err) {
+    res.status(400).send(`pluginid ${req.params.pluginid} - not a number`)
+    return
+  }
+  if (typeof(req.body) != 'object') {
+    res.status(400).send('put role body not object')
+    return
+  }
+  let perfint:PerformanceIntegration = {
+    id: 0,// dummy
+    pluginid: pluginid,
+    performanceid: performanceid,
+    enabled: req.body.enabled,
+    guid: req.body.guid
+  }
+  setPerformanceIntegration(req.user, performanceid, pluginid, perfint)
+  .then((changed) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(changed))
+  })
+  .catch((err) => {
+    sendError(res, err)
+  })
+})
 router.all('*', (req, res) => {
   res.sendStatus(404)
 })

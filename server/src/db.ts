@@ -510,31 +510,10 @@ export function getPerformances(account:Account, work:Work) : Promise<Performanc
     
   })
 }
-
 export function getPerformance(account:Account, performanceid:number) : Promise<Performance> {
   return new Promise((resolve, reject) => {
-    pool.getConnection((err, con) => {
-      if (err) {
-        console.log(`Error getting connection: ${err.message}`)
-        reject(err)
-        return
-      }
-      // Use the connection
-      let query = 'SELECT * FROM `performance` WHERE `id` = ?'
-      let params = [performanceid]
-      con.query(query, params, (err, results, fields) => {
-          if (err) {
-            con.release()
-            console.log(`Error doing getPerformance select: ${err.message}`)
-            reject(err)
-            return
-          }
-          con.release()
-          if (results.length==0) {
-            reject(new NotFoundError(`performance ${performanceid} not found`))
-            return
-          }
-          let perf:Performance = mapPerformance(results[0])
+      getRawPerformance(performanceid)
+      .then((perf) => { 
           getWork(account, perf.workid)
           .then((work) => {
             perf.work = work;
@@ -546,14 +525,18 @@ export function getPerformance(account:Account, performanceid:number) : Promise<
                 reject(new PermissionError(`performance ${performanceid} not accessible to ${account.email}`))
               }
             })
+            .catch((err) => {
+              console.log(`Error checking access to performance ${performanceid} of work ${perf.workid}: ${err.message}`, err)
+              reject(err)
+            })
           })
           .catch((err) => {
-            console.log(`Error checking access to performance ${performanceid} of work ${perf.workid}: ${err.message}`, err)
             reject(err)
           })
       })
-    })
-    
+      .catch((err) => {
+        reject(err)
+      })
   })
 }
 export function putPerformance(account:Account, performanceid:number, performance:Performance) : Promise<void> {
@@ -937,6 +920,72 @@ export function getPerformanceIntegrations(account:Account, performanceid:number
     .catch((err) => reject(err))
   })
 }
+export function setPerformanceIntegration(account:Account, performanceid: number, pluginid: number, perfint:PerformanceIntegration) : Promise<boolean> {
+  return new Promise((resolve,reject) => {
+    // only admin for now?!
+    hasCapability(account, Capability.CreatePerformanceIntegration)
+    .then((access) => {
+      if (!access) {
+        reject(new PermissionError(`cannot create performance integration`))
+        return
+      }
+      return getRawPlugin(pluginid)
+      .then((plugin) => {
+        return getRawPerformance(performanceid)
+        .then((performance) => {
+          
+          pool.getConnection((err, con) => {
+            if (err) {
+              console.log(`Error getting connection: ${err.message}`)
+              reject(err)
+              return
+            }
+            // check/add
+            let query = 'SELECT `id` FROM `performance_integration` WHERE `performanceid` = ? AND `pluginid` = ?'
+            let params = [performanceid, pluginid]
+            con.query(query, params, (err, results, fields) => {
+              if (err) {
+                con.release()
+                console.log(`Error doing setPerformanceIntegration select: ${err.message}`)
+                reject(err)
+                return
+              }
+              if (results.length==0) {
+                let query = 'INSERT INTO `performance_integration` ( `performanceid`, `pluginid`, `guid`, `enabled`) VALUES ( ?, ?, ?, ? )'
+                let params = [performanceid, pluginid, perfint.guid, perfint.enabled]
+                con.query(query, params, (err, results, fields) => {
+                  con.release()
+                  if (err) {
+                    console.log(`Error doing setPerformanceIntegration insert: ${err.message}`)
+                    reject(err)
+                    return
+                  }
+                  resolve(true)
+                })
+              } else {
+                let id = results[0].id
+                let query = 'UPDATE `performance_integration` SET `guid` = ?, `enabled` = ? WHERE `id` = ?'
+                let params = [perfint.guid, perfint.enabled, id]
+                con.query(query, params, (err, results, fields) => {
+                  con.release()
+                  if (err) {
+                    console.log(`Error doing setPerformanceIntegration update: ${err.message}`)
+                    reject(err)
+                    return
+                  }
+                  resolve(true)
+                })
+              }
+            })
+          })
+        })
+      })
+      .catch(err => reject(err))
+    })
+    .catch(err => reject(err))
+  })
+}
+        
 // no perm check here - low-level
 function getRawPlugin(pluginid:number): Promise<Plugin> {
   return new Promise((resolve, reject) => {

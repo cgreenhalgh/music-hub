@@ -48,7 +48,7 @@
     </ul>
     <form *ngIf="canCreatePerfints" [formGroup]="pluginForm" (ngSubmit)="newPerfint()">
       <div class="form-group">
-        <label>Enable a new plugin</label>
+        <label>Enable/update plugin:*</label>
         <select formControlName="pluginid" class="form-control">
           <option [value]="null"></option>
           <option *ngFor="let plugin of plugins" [value]="plugin.id">{{plugin.title}} ({{plugin.code}})</option>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { notNullValidator } from './not-null-validator.directive';
 
 import { Work, Performance, Plugin, PerformanceIntegration, RoleAssignment, Capability, Role, Account, Plugin } from './types'
 import { ApiService } from './api.service'
@@ -44,7 +45,7 @@ export class PerformanceDetailComponent implements OnInit {
   }
   createForm() { 
     this.pluginForm = this.fb.group({
-      pluginid: ['', Validators.required ],
+      pluginid: ['', notNullValidator() ],
       guid: ['', Validators.required ],
      });
   }
