@@ -80,7 +80,7 @@
 			"id": "visuals.browserview",
 			"name": "'visuals' browser view",
 			"kind": "Report",
-			"level": "error",
+			"level": "warning",
 			"maxCardinality": 1,
 			"like": {
 				"@type": "Process",
@@ -230,7 +230,7 @@
 			"like": {
 				"processType": "Node.js",
 				"@type": "Process",
-				"title": "/vagrant/musiccodes/server/server.js"
+				"title": "/srv/musiccodes/server.js"
 			},
 			"feedback":{
 				"unmatched":"The musicodes server doesn't seem to be running",

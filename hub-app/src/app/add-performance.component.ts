@@ -58,7 +58,7 @@ export class AddPerformanceComponent implements OnInit {
     this.api.postPerformanceOfWork(p, this.workid).subscribe(
       (res) => {
         console.log('added performance '+res.id)
-        this.router.navigate(['performance', String(res.id) )
+        this.router.navigate(['performance', String(res.id)] )
       },
       (err) => { 
         this.error = this.api.getMessageForError(err)

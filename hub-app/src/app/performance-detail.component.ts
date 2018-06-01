@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { notNullValidator } from './not-null-validator.directive';
 
-import { Work, Performance, Plugin, PerformanceIntegration, RoleAssignment, Capability, Role, Account, Plugin } from './types'
+import { Work, Performance, Plugin, PerformanceIntegration, RoleAssignment, Capability, Role, Account } from './types'
 import { ApiService } from './api.service'
 
 import 'rxjs/add/operator/switchMap';
@@ -104,7 +104,6 @@ export class PerformanceDetailComponent implements OnInit {
           (res) => { this.accounts = res; },
           (err) => { console.log('error getting accounts', err) }
         )
-        this.savingPlugin = false
         this.perfint = {} as PerformanceIntegration
         this.rebuildForm()
       })
@@ -133,7 +132,7 @@ export class PerformanceDetailComponent implements OnInit {
     this.saveRole(this.addRoleAccountid, Role.PerformanceManager, this.performanceid, true)
   }
   removeRoleAssignent(ra:RoleAssignment) {
-    this.saveRole(ra.accountid, ra.role, ra.performanceid, false)
+    this.saveRole(ra.accountid, ra.role, String(ra.performanceid), false)
   }
   saveRole(accountid:number, role:string, performanceid:string, grant:boolean) {
     if (accountid===null || accountid===undefined)
@@ -179,12 +178,13 @@ export class PerformanceDetailComponent implements OnInit {
   prepareSavePerfint(): PerformanceIntegration {
     const formModel = this.pluginForm.value;
     const perfint:PerformanceIntegration = {
-      //id:0,
+      id:0,
       performanceid: Number(this.performanceid),
       pluginid: formModel.pluginid!=null ? Number(formModel.pluginid) : null,
       guid: formModel.guid,
       enabled: true,
     }
+    delete perfint.id
     return perfint;
   }
 }

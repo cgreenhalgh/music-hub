@@ -84,7 +84,7 @@ export class WorkDetailComponent implements OnInit {
     this.saveRole(this.addRoleAccountid, Role.Performer, this.workid, true)
   }
   removeRoleAssignent(ra:RoleAssignment) {
-    this.saveRole(ra.accountid, ra.role, ra.workid, false)
+    this.saveRole(ra.accountid, ra.role, String(ra.workid), false)
   }
   saveRole(accountid:number, role:string, workid:string, grant:boolean) {
     if (accountid===null || accountid===undefined)

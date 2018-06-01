@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Account, Work, Performance, PerformanceIntegration, PluginActionResponse, Download, RoleAssignment } from './types'
+import { Account, Work, Performance, PerformanceIntegration, PluginActionResponse, Download, RoleAssignment, Plugin } from './types'
 
 export enum LoginState {
   LoggedOut = 1,
@@ -169,6 +169,6 @@ export class ApiService {
     return this.http.get<Plugin[]>(this.apiUrl+'/plugins', {headers:this.getHeaders()})
   }
   savePerformanceIntegration(perfint:PerformanceIntegration) : Observable<boolean> {
-    return this.http.put<boolean>(this.apiUrl+'/performance/'+encodeURIComponent(perfint.performanceid)+'/integration/'+encodeURIComponent(perfint.pluginid), perfint, {headers:this.getHeaders()})
+    return this.http.put<boolean>(this.apiUrl+'/performance/'+encodeURIComponent(String(perfint.performanceid))+'/integration/'+encodeURIComponent(String(perfint.pluginid)), perfint, {headers:this.getHeaders()})
   }
 }
