@@ -39,7 +39,7 @@
       <button type="button" [disabled]="savingRoles" class="btn btn-info btn-sm" (click)="addPerformanceManager()">Make manager</button>
     </div>
     <h3>Tools</h3>
-    <div *ngIf="error2" class="alert alert-danger">Error: {{error}}</div>
+    <div *ngIf="error2" class="alert alert-danger">Error: {{error2}}</div>
     <div *ngIf="loading2">Loading plugins...</div>
     <ul>
       <li *ngFor="let perfint of performanceIntegrations">

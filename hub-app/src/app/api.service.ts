@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Account, Work, Performance, PerformanceIntegration, PluginActionResponse, Download, RoleAssignment, Plugin } from './types'
+import { Account, Work, Performance, PerformanceIntegration, Recording, PluginActionResponse, Download, RoleAssignment, Plugin } from './types'
 
 export enum LoginState {
   LoggedOut = 1,
@@ -109,6 +109,9 @@ export class ApiService {
   doIntegrationAction(performanceid:string, pluginid:string, actionid:string): Observable<PluginActionResponse> {
     return this.http.post<PluginActionResponse>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/integration/'+encodeURIComponent(pluginid)+'/'+encodeURIComponent(actionid), null, {headers:this.getHeaders()})
   }
+  getPerformanceRecordings(performanceid:string): Observable<Recording[]> {
+    return this.http.get<Recording[]>(this.apiUrl+'/performance/'+encodeURIComponent(performanceid)+'/recordings', {headers:this.getHeaders()})
+  }
   putPerformance(performance:Performance): Observable<Performance> {
     // selective... no cached values
     let p:Performance = Object.assign({}, performance)
@@ -170,5 +173,11 @@ export class ApiService {
   }
   savePerformanceIntegration(perfint:PerformanceIntegration) : Observable<boolean> {
     return this.http.put<boolean>(this.apiUrl+'/performance/'+encodeURIComponent(String(perfint.performanceid))+'/integration/'+encodeURIComponent(String(perfint.pluginid)), perfint, {headers:this.getHeaders()})
+  }
+  postRecordingOfPerformance(recording:Recording, file:File): Observable<string> {
+    let data = new FormData()
+    data.append('recording', JSON.stringify(recording))
+    data.append('file', file, file.name)
+    return this.http.post<string>(this.apiUrl+'/performance/'+encodeURIComponent(String(recording.performanceid))+'/recordings', data, {headers:this.getHeaders()})
   }
 }

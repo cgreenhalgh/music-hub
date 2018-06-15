@@ -12,6 +12,7 @@ import { AddPerformanceComponent } from './add-performance.component';
 import { PerformanceDetailComponent } from './performance-detail.component';
 import { PerformanceFormComponent } from './performance-form.component';
 import { IntegrationDetailComponent } from './integration-detail.component';
+import { RecordingFormComponent } from './recording-form.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AccountComponent } from './account.component';
 import { AccountFormComponent } from './account-form.component';
@@ -27,6 +28,7 @@ import { ApiService } from './api.service';
     PerformanceDetailComponent,
     PerformanceFormComponent,
     IntegrationDetailComponent,
+    RecordingFormComponent,
     AccountComponent,
     AccountFormComponent,
     AccountsListComponent

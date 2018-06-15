@@ -18,6 +18,7 @@
         in {{perfint.performance.location}}, {{perfint.performance.date}} {{perfint.performance.time}} {{ perfint.performance.timezone}}, 
         {{perfint.performance.status}}</p>
       <p>GUID: {{ perfint.guid }}</p>
+
       <div *ngIf="perfint.plugin.actions && !!perfint.capabilities && perfint.capabilities['manage-performance-integration']">
         <h3>Actions</h3>
         <!-- TODO disable depending on role? enabled? -->
@@ -43,6 +44,24 @@
       <ul>
         <div *ngFor="let action of actions" class="alert" [ngClass]="{'alert-danger':action.error,'alert-success':action.success,'alert-info':(!action.success && !action.error)}">{{action.text}}</div>
       </ul>
+
+      <h3>Recordings</h3>
+      <div *ngIf="errorRecordings" class="alert alert-danger">Error: {{errorRecordings}}</div>
+      <ul>
+        <li *ngIf="loadingRecordings">Loading recordings...</li>
+        <li *ngFor="let rec of recordings">
+          <em>{{rec.perspective}}</em>:
+          <span *ngIf="!publicrecordingurl">{{rec.relpath}}</span>
+          <a *ngIf="!!publicrecordingurl" target="_blank" href="{{publicrecordingurl}}{{rec.relpath}}">{{rec.relpath}}</a>
+          ({{rec.mimetype}}), starts at {{rec.start_time_offset}} seconds<span *ngIf="rec.ispublic">, public</span>
+        </li>
+      </ul>
+      <div *ngIf="perfint.capabilities['create-recording']">
+        <button *ngIf="!addingRecording" class="btn btn-info" (click)="addRecording()">Add new recording</button>
+        <hub-recording-form *ngIf="newRecording" [recording]="newRecording" 
+          [adding]="true" [disabled]="savingRecording" 
+          (cancel)="cancelAddRecording()" (save)="saveNewRecording($event)"></hub-recording-form>
+      </div>
     </div>
   </div>
 </div>

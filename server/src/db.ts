@@ -863,6 +863,47 @@ export function getRawRecordings(performanceid:number) : Promise<Recording[]> {
   })
 }
 
+export function addRecordingOfPerformance(account:Account, recording:Recording, performanceid:number) : Promise<number> {
+  return new Promise((resolve, reject) => {
+    getPerformance(account, performanceid)
+    .then((performance) => {
+      recording.performanceid = performance.id
+      recording.workid = performance.workid
+      delete recording.id
+      return hasCapability(account, Capability.CreateRecording, performance.work, performance)
+    })
+    .then((access) => {
+      if (!access) {
+        throw new PermissionError(`user cannot create recording of performance ${performanceid}`)
+      }
+    })
+    .then(() => {
+      pool.getConnection((err, con) => {
+        if (err) {
+          console.log(`Error getting connection: ${err.message}`)
+          reject(err)
+          return
+        }
+        let insert = 'INSERT INTO `recording` ( `workid`, `performanceid`, `relpath`, `mimetype`, `perspective`, `start_time_offset`, `public` ) '+
+          ' VALUES ( ?, ?, ?, ?, ?, ?, ? )'
+        let values = [recording.workid, recording.performanceid, recording.relpath, 
+          recording.mimetype, recording.perspective, recording.start_time_offset,
+          recording.ispublic ? 1 : 0]
+        con.query(insert, values, (err, results, fields) => {
+          con.release()
+          if (err) {
+            console.log(`Error doing addRecordingOfPerformance insert: ${err.message}`)
+            reject(err)
+            return
+          }
+          let id = results.insertId
+          resolve(id);
+        })
+      })
+    })
+    .catch((err) => reject(err))
+  })
+}
 
 function mapPerformanceIntegration(result:any) : PerformanceIntegration {
   if (!result)

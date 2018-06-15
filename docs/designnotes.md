@@ -223,48 +223,68 @@ Each plugin action response has:
 
 Web API. 
 
-Initially basic authentication. (order of priority)
+Initially basic authentication. 
 
+### accounts
+
+`GET /api/1/accounts` -> all accounts info.
+`POST /api/1/accounts` -> new account; return new id
 `GET /api/1/account` -> account info.(current user)
 
-(13) `GET /api/1/capability/<CAPABILITY>` -> true/false (current user)
-(13) `GET /api/1/work/<WORK>/capability/<CAPABILITY>` -> true/false (current user)
-(13) `GET /api/1/performance/<PERFORMANCE>/capability/<CAPABILITY>` -> true/false (current user)
-(12) `GET /api/1/accounts` -> all accounts info.
-(14) `POST /api/1/accounts` -> return new id
+`GET /api/1/capability/<CAPABILITY>` -> true/false (current user, site-wide capability)
+
+### works
 
 `GET /api/1/works` -> array of works
 `GET /api/1/work/<WORK>` -> work info
-(1) `GET /api/1/work/<WORK>/performances` -> array of performances
-(2) `GET /api/1/performance/<PERFORMANCE>` -> performance info
-
-(10) `PUT /api/1/performance/<PERFORMANCE>` -> edit performance info
-
-(11) `POST /api/1/work/<WORK>/performances` -> add new performance
+`GET /api/1/work/<WORK>/performances` -> array of performances
+`POST /api/1/work/<WORK>/performances` -> add new performance
 
 `GET /api/1/work/<WORK>/downloads` -> array of downloads
-`GET /api/1/work/<WORK>/roles` -> array of RoleAssignments
+
+`GET /api/1/work/<WORK>/roles` -> array of RoleAssignments (all users)
 `PUT /api/1/work/<WORK>/account/<ACCOUNT>/role/<ROLE>` - send {grant:true/false}
+`GET /api/1/work/<WORK>/capability/<CAPABILITY>` -> true/false (current user, specific work)
 
-`GET /downloads/<WORK>/<FILENAME>` -> download
-
-(3) `GET /api/1/performance/<PERFORMANCE>/integrations` -> array of integrations (incl. disabled/possible?!)
-
-(4) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> integration info (including links to integration-specific downloads?!)
+### plugins
 
 `GET /api/1/plugins` -> array of Plugins
 
-`PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> edit /create integration info
+### performances
 
-(5)`PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/<ACTION>` -> perform a plugin action
-
-(6) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/redis-list` -> get Climb! app redis state
-(7) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/redis-clear` -> clear Climb! app redis state
-(8) `PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/app-config` -> update app config file
-
-(9) `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/download/<DOWNLOAD>` -> integration-specific download (e.g. MPM file?)
+`GET /api/1/performance/<PERFORMANCE>` -> performance info
+`PUT /api/1/performance/<PERFORMANCE>` -> edit performance info
 
 `GET /api/1/performance/<PERFORMANCE>/recordings` -> array of recordings
+TODO: `POST /api/1/performance/<PERFORMANCE>/recordings` -> NB multi-part form upload! to include actual file; returns new recording id
 
-`GET /api/1/performance/<PERFORMANCE>/roles` -> array of RoleAssignments
+`GET /api/1/performance/<PERFORMANCE>/integrations` -> array of integrations (incl. disabled/possible?!)
+`GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> integration info (including links to integration-specific downloads?!)
+`PUT /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> edit /create integration info
+`POST /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>/<ACTION>` -> perform a plugin action
+
+`GET /api/1/performance/<PERFORMANCE>/roles` -> array of RoleAssignments (all users)
 `PUT /api/1/performance/<PERFORMANCE>/account/<ACCOUNT>/role/<ROLE>` - send {grant:true/false}
+`GET /api/1/performance/<PERFORMANCE>/capability/<CAPABILITY>` -> true/false (current user)
+
+### recordings
+
+TODO: `PUT /api/1/recording/<RECORDING>` -> edit recording metadata
+
+### downloads
+
+`GET /downloads/<WORK>/<FILENAME>` -> download file content (basic auth)
+
+### Climb-integration-specific `<ACTION>`s:
+
+Defined in Climb plugin.
+
+- `redis-list` - get Climb! app redis state
+- `redis-clear` - clear Climb! app redis state
+- `app-config` - update app config file
+- `get-url` - get app URL
+- `get-mpm-config` - Get music-performance-manager config file
+- `get-muzicodes-settings` - get settings for musicodes server/app integration (redis)
+- `archive-include` - include in archive
+- `archive-exclude` - exclude from archive
+- `archive-reset-log` - clear data dervived from performance log from archive

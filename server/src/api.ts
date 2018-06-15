@@ -1,11 +1,13 @@
 import * as express from 'express'
 import * as fs from 'fs'
+import * as multer from 'multer'
 
-import { Work, Performance, Download, Capability, Account, RoleAssignment, Role, PerformanceIntegration } from './types'
+import { Work, Performance, Download, Capability, Account, RoleAssignment, Role, 
+  PerformanceIntegration, Recording } from './types'
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
   addPerformanceOfWork, getAccounts, addAccount, getPerformanceRoles, getWorkRoles, setWorkAccountRole,
-  setPerformanceAccountRole, getPlugins, setPerformanceIntegration } from './db'
+  setPerformanceAccountRole, getPlugins, setPerformanceIntegration, addRecordingOfPerformance } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -285,7 +287,11 @@ router.get('/performance/:performanceid/integration/:pluginid', (req, res) => {
     // check capability
     return hasCapability(req.user, Capability.ManagePerformanceIntegration, perfint.performance.work, perfint.performance)
     .then((access) => {
-      perfint.capabilities[Capability.ManagePerformanceIntegration] = access
+      perfint.capabilities[Capability.ManagePerformanceIntegration] = access;
+      return hasCapability(req.user, Capability.CreateRecording, perfint.performance.work, perfint.performance)
+    })
+    .then((access) => {
+      perfint.capabilities[Capability.CreateRecording] = access;
     })
     .then(() => {
       res.setHeader('Content-type', 'application/json')
@@ -569,6 +575,76 @@ router.put('/performance/:performanceid/integration/:pluginid', (req, res) => {
     res.send(JSON.stringify(changed))
   })
   .catch((err) => {
+    sendError(res, err)
+  })
+})
+const UPLOADS_DIR = 'mounts/uploads/'
+let upload = multer({
+  dest: UPLOADS_DIR,
+  limits: { fileSize: 200*1024*1024, files: 1 }
+})
+function removeFile(file:string):void {
+  fs.unlink(file, (err) => {
+    console.log('error unlinking file '+file+': '+err.message)
+  })
+}
+router.post('/performance/:performanceid/recordings', upload.single('file'), (req,res) => {
+  // Note: form encoded, with recording & form
+  if (!req.file) {
+    return res.status(400).send('No file was uploaded.');
+  }
+  console.log('uploaded file', req.file)
+  // originalname, mimetype, path
+  var performanceid
+  try { performanceid = Number(req.params.performanceid) }
+  catch (err) {
+    removeFile(req.file.path)
+    res.status(400).send(`performanceid ${req.params.performanceid} - not a number`)
+    return
+  }
+  var recording
+  try {
+    recording = JSON.parse(req.body.recording) as Recording
+  }
+  catch (err) {
+    removeFile(req.file.path)
+    res.status(400).send(`error in encoding of recording`)
+    return
+  }
+  console.log('upload recording', recording)
+  var extension:string = ''
+  var originalname = req.file.originalname
+  let extensionix = originalname.lastIndexOf('.')
+  if (extensionix>=0) {
+    extension = originalname.substring(extensionix)
+    originalname = originalname.substring(0, extensionix)
+  } else {
+    if ('audio/mpeg'==req.file.mimetype)
+      extension = '.mp3'
+    else if ('video/mp4'==req.file.mimetype)
+      extension = '.mp4'
+    else
+      console.log('no file extension for mimetype '+req.file.mimetype)
+  }
+  recording.mimetype = req.file.mimetype
+  recording.relpath = originalname+'-'+req.file.filename+extension
+  let path = UPLOADS_DIR+recording.relpath
+  try {
+    if (extension.length>0)
+      fs.renameSync(req.file.path, path)
+  } catch (err) {
+    removeFile(req.file.path)
+    console.log('could not rename '+req.file.path+' -> '+path+': '+err.message)
+    res.status(500).send(`could not rename uploaded file`)
+    return
+  }
+  addRecordingOfPerformance(req.user, recording, performanceid)
+  .then((recordingid) => {
+    res.setHeader('Content-type', 'application/json')
+    res.send(JSON.stringify(recordingid))
+  })
+  .catch((err) => {
+    removeFile(path)
     sendError(res, err)
   })
 })
