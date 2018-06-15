@@ -47,6 +47,7 @@
 
       <h3>Recordings</h3>
       <div *ngIf="errorRecordings" class="alert alert-danger">Error: {{errorRecordings}}</div>
+      <div *ngIf="savingRecording" class="alert alert-info">Saving...</div>
       <ul>
         <li *ngIf="loadingRecordings">Loading recordings...</li>
         <li *ngFor="let rec of recordings">
@@ -54,13 +55,17 @@
           <span *ngIf="!publicrecordingurl">{{rec.relpath}}</span>
           <a *ngIf="!!publicrecordingurl" target="_blank" href="{{publicrecordingurl}}{{rec.relpath}}">{{rec.relpath}}</a>
           ({{rec.mimetype}}), starts at {{rec.start_time_offset}} seconds<span *ngIf="rec.ispublic">, public</span>
+          <button type="button" [disabled]="addingRecording" class="btn btn-info btn-sm" (click)="editRecording(rec)">Edit</button>
         </li>
       </ul>
       <div *ngIf="perfint.capabilities['create-recording']">
-        <button *ngIf="!addingRecording" class="btn btn-info" (click)="addRecording()">Add new recording</button>
+        <button *ngIf="!addingRecording && !editedRecording" class="btn btn-info" (click)="addRecording()">Add new recording</button>
         <hub-recording-form *ngIf="newRecording" [recording]="newRecording" 
           [adding]="true" [disabled]="savingRecording" 
           (cancel)="cancelAddRecording()" (save)="saveNewRecording($event)"></hub-recording-form>
+        <hub-recording-form *ngIf="!!editedRecording" [recording]="editedRecording" 
+          [adding]="false" [disabled]="savingRecording" 
+          (cancel)="cancelEditRecording()" (save)="saveEditRecording($event)"></hub-recording-form>
       </div>
     </div>
   </div>

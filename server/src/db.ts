@@ -862,6 +862,34 @@ export function getRawRecordings(performanceid:number) : Promise<Recording[]> {
     })
   })
 }
+function getRawRecording(recordingid:number) : Promise<Recording> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con) => {
+      if (err) {
+        console.log(`Error getting connection: ${err.message}`)
+        reject(err)
+        return
+      }
+      // Use the connection
+      let query = 'SELECT * FROM `recording` WHERE `id` = ?'
+      let params = [recordingid]
+      con.query(query, params, (err, results, fields) => {
+          if (err) {
+            con.release()
+            console.log(`Error doing getRawRecording select: ${err.message}`)
+            reject(err)
+            return
+          }
+          con.release()
+          if (results.length==0) {
+            reject(new NotFoundError(`recording ${recordingid} not found`))
+            return
+          }
+          resolve(mapRecording(results[0]))
+      })
+    })
+  })
+}
 
 export function addRecordingOfPerformance(account:Account, recording:Recording, performanceid:number) : Promise<number> {
   return new Promise((resolve, reject) => {
@@ -904,7 +932,45 @@ export function addRecordingOfPerformance(account:Account, recording:Recording, 
     .catch((err) => reject(err))
   })
 }
-
+export function putRecording(account:Account, recording:Recording) : Promise<void> {
+  return new Promise((resolve, reject) => {
+    getPerformance(account, recording.performanceid)
+    .then((performance) => {
+      recording.workid = performance.workid
+      return getRawRecording(recording.id)
+        .then((rec) => {
+          return hasCapability(account, Capability.CreateRecording, performance.work, performance, null, rec)
+        })
+    })
+    .then((access) => {
+      if (!access) {
+        throw new PermissionError(`user cannot edit recording ${recording.id}`)
+      }
+    })
+    .then(() => {
+      pool.getConnection((err, con) => {
+        if (err) {
+          console.log(`Error getting connection: ${err.message}`)
+          reject(err)
+          return
+        }
+        let update = 'UPDATE `recording` SET `mimetype` = ?, `perspective` = ?, `start_time_offset` = ?, `public` = ? WHERE id = ?'
+        let values = [recording.mimetype, recording.perspective, recording.start_time_offset,
+          recording.ispublic ? 1 : 0, recording.id]
+        con.query(update, values, (err, results, fields) => {
+          con.release()
+          if (err) {
+            console.log(`Error doing putRecording update: ${err.message}`)
+            reject(err)
+            return
+          }
+          resolve();
+        })
+      })
+    })
+    .catch((err) => reject(err))
+  })
+}
 function mapPerformanceIntegration(result:any) : PerformanceIntegration {
   if (!result)
     return null

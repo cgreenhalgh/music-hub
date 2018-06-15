@@ -32,6 +32,7 @@ export class IntegrationDetailComponent implements OnInit {
   publicrecordingurl:string = null // nasty climb-specific hack for public url
   addingRecording:boolean = false
   newRecording:Recording = null
+  editedRecording:Recording = null
   savingRecording:boolean
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +51,10 @@ export class IntegrationDetailComponent implements OnInit {
         this.error = null
         this.loading = true
         this.publicrecordingurl = null
+        this.editedRecording = null
+        this.newRecording = null
+        this.savingRecording = false
+        this.addingRecording = false
         this.api.getPerformanceIntegration(params.get('performanceid'), params.get('pluginid')).subscribe(
           (res) => { this.perfint = res; this.updateUrls(); this.loading=false; },
           (err) => { this.error = err.message; this.loading=false }
@@ -127,11 +132,25 @@ export class IntegrationDetailComponent implements OnInit {
   }
   saveNewRecording(recording:RecordingAndFile):void {
     console.log('save new recording', recording)
-    if (recording.file) {
-    }
     this.savingRecording = true
     this.api.postRecordingOfPerformance(recording.recording, recording.file).subscribe(
       (res) => { this.refreshRecordings(); this.savingRecording=false; this.addingRecording=false; this.newRecording = null },
+      (err) => { this.errorRecordings = this.api.getMessageForError(err); this.savingRecording=false }
+    )
+  }
+  editRecording(recording:Recording):void {
+    this.editedRecording = recording
+  }
+  cancelEditRecording(): void {
+    this.editedRecording = null;
+    this.savingRecording = false
+    this.errorRecordings = null
+  }
+  saveEditRecording(recording:RecordingAndFile): void {
+    console.log('save edited recording', recording.recording)
+    this.savingRecording = true
+    this.api.putRecording(recording.recording).subscribe(
+      (res) => { this.refreshRecordings(); this.savingRecording=false; this.editedRecording = null },
       (err) => { this.errorRecordings = this.api.getMessageForError(err); this.savingRecording=false }
     )
   }

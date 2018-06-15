@@ -180,4 +180,7 @@ export class ApiService {
     data.append('file', file, file.name)
     return this.http.post<string>(this.apiUrl+'/performance/'+encodeURIComponent(String(recording.performanceid))+'/recordings', data, {headers:this.getHeaders()})
   }
+  putRecording(recording:Recording): Observable<void> {
+    return this.http.put<void>(this.apiUrl+'/recording/'+encodeURIComponent(String(recording.id)), recording, {headers: this.getHeaders()})
+  }
 }

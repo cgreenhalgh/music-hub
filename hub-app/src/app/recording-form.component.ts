@@ -27,9 +27,9 @@ export class RecordingFormComponent implements OnChanges  {
   ) { 
     this.createForm();
   }
-  requiredIfAdding(): ValidatorFn {
+  requiredIfAdding(noreverse:boolean): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} => {
-      const forbidden = this.adding && ("null"==control.value || null===control.value)
+      const forbidden = (this.adding !== !noreverse) && ("null"==control.value || null===control.value)
       return forbidden ? {'required': {value: control.value}} : null;
     };
   }
@@ -37,7 +37,9 @@ export class RecordingFormComponent implements OnChanges  {
   createForm() { 
     this.recordingForm = this.fb.group({
       perspective: ['', Validators.required ],
-      file: ['', this.requiredIfAdding() ],
+      file: ['', this.requiredIfAdding(true) ],
+      relpath: [{value:'', disabled:true} ],
+      mimetype: ['', this.requiredIfAdding(true) ],
       ispublic: '',
       start_time_offset: ['', Validators.required ],
      });
@@ -51,6 +53,7 @@ export class RecordingFormComponent implements OnChanges  {
   }
   rebuildForm() {
     this.recordingForm.reset(this.recording);
+    this.recordingForm.get('relpath').disable()
   }
   fileUpdated($event) {
     const files = $event.target.files || $event.srcElement.files;
@@ -76,7 +79,8 @@ export class RecordingFormComponent implements OnChanges  {
     saveRecording.perspective = formModel.perspective as string
     saveRecording.start_time_offset = Number(formModel.start_time_offset)
     saveRecording.ispublic = !!formModel.ispublic
-    saveRecording.relpath = formModel.file
+    saveRecording.relpath = this.adding ? formModel.file : formModel.relpath
+    saveRecording.mimetype = ''==formModel.mimetype ? null : formModel.mimetype as string
     return saveRecording;
   }
   revert() {

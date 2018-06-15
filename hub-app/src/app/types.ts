@@ -100,6 +100,7 @@ export interface Recording {
   perspective?:string
   start_time_offset:number
   ispublic:boolean
+  capabilities?:Capabilities
 }
 
 export interface PluginSetting {

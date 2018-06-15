@@ -9,6 +9,14 @@
     <label class="center-block">File:*</label>
     <input type="file" (change)="fileUpdated($event)" formControlName="file" accept="audio/mpeg,video/mp4,.mp4,.mp3"/>
   </div>
+  <div class="form-group" *ngIf="!adding">
+    <label class="center-block">File:</label>
+    <p>{{recording.relpath}}</p>
+  </div>
+  <div class="form-group" *ngIf="!adding">
+    <label class="center-block">Mime type*:</label>
+    <input class="form-control" formControlName="mimetype"/>
+  </div>
   <div class="form-group">
     <label class="center-block">Perspective:*</label>
     <input class="form-control" formControlName="perspective">

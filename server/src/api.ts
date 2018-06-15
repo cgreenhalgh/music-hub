@@ -7,7 +7,8 @@ import { Work, Performance, Download, Capability, Account, RoleAssignment, Role,
 import { authenticate, getWork, getWorks, getPerformances, getPerformance, getPerformanceIntegrations, 
   getPerformanceIntegration, getRawRevLinkedPerformanceId, getPerformanceRecordings, putPerformance,
   addPerformanceOfWork, getAccounts, addAccount, getPerformanceRoles, getWorkRoles, setWorkAccountRole,
-  setPerformanceAccountRole, getPlugins, setPerformanceIntegration, addRecordingOfPerformance } from './db'
+  setPerformanceAccountRole, getPlugins, setPerformanceIntegration, addRecordingOfPerformance,
+  putRecording } from './db'
 import { AuthenticationError, PermissionError, NotFoundError, BadRequestError } from './exceptions'
 import { hasCapability } from './access'
 import { PluginProvider, getPlugin } from './plugins'
@@ -251,8 +252,15 @@ router.get('/performance/:performanceid/recordings', (req, res) => {
   .then(performance => 
     getPerformanceRecordings(req.user, performance, performance.work)
     .then((recordings) => {
-      res.setHeader('Content-type', 'application/json')
-      res.send(JSON.stringify(recordings))
+      let ps = recordings.map((r) => {
+        return hasCapability(req.user, Capability.EditRecording, performance.work, performance, null, r)
+          .then((access) => { r.capabilities = {}; r.capabilities[Capability.EditRecording] = access })
+      })
+      return Promise.all(ps)
+      .then(() => {
+        res.setHeader('Content-type', 'application/json')
+        res.send(JSON.stringify(recordings))
+      })
     })
   )
   .catch((err) => {
@@ -645,6 +653,26 @@ router.post('/performance/:performanceid/recordings', upload.single('file'), (re
   })
   .catch((err) => {
     removeFile(path)
+    sendError(res, err)
+  })
+})
+// PUT recording
+router.put('/recording/:recordingid', (req, res) => {
+  var recordingid
+  try { recordingid= Number(req.params.recordingid) }
+  catch (err) {
+    console.log(`put /recording/${req.params.recordingid} - not a number`)
+    res.sendStatus(404)
+    return
+  }
+  let rec = req.body as Recording
+  rec.id = recordingid
+  putRecording(req.user, req.body as Recording)
+  .then(() => {
+    res.setHeader('Content-type', 'application/json')
+    res.send('true');
+  })
+  .catch((err) => {
     sendError(res, err)
   })
 })

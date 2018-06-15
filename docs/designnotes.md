@@ -256,7 +256,7 @@ Initially basic authentication.
 `PUT /api/1/performance/<PERFORMANCE>` -> edit performance info
 
 `GET /api/1/performance/<PERFORMANCE>/recordings` -> array of recordings
-TODO: `POST /api/1/performance/<PERFORMANCE>/recordings` -> NB multi-part form upload! to include actual file; returns new recording id
+`POST /api/1/performance/<PERFORMANCE>/recordings` -> NB multi-part form upload! to include actual file; returns new recording id
 
 `GET /api/1/performance/<PERFORMANCE>/integrations` -> array of integrations (incl. disabled/possible?!)
 `GET /api/1/performance/<PERFORMANCE>/integration/<PLUGIN>` -> integration info (including links to integration-specific downloads?!)
@@ -269,7 +269,7 @@ TODO: `POST /api/1/performance/<PERFORMANCE>/recordings` -> NB multi-part form u
 
 ### recordings
 
-TODO: `PUT /api/1/recording/<RECORDING>` -> edit recording metadata
+`PUT /api/1/recording/<RECORDING>` -> edit recording metadata
 
 ### downloads
 
